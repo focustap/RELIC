@@ -4,7 +4,7 @@
 const $=id=>document.getElementById(id);
 const NAMES={home:"DASHBOARD",duel:"DUEL ARENA",packs:"CARD SHOP",collection:"COLLECTION",deck:"DECK BUILDER",rules:"HOW TO PLAY"};
 const K="relic-alpha-save-2";
-const start=()=>({gold:35,owned:Object.assign({},STARTER_LIST,{"emberstone-colossus":1,"verdant-leviathan":1}),deck:STARTER_DECK.slice(),extra:STARTER_EXTRA.slice(),wins:0,losses:0,daily:"",starter:"ember"});
+const start=()=>({gold:35,owned:Object.assign({},STARTER_LIST,{"emberstone-colossus":1,"verdant-leviathan":1}),deck:STARTER_DECK.slice(),extra:STARTER_EXTRA.slice(),wins:0,losses:0,daily:"",starter:"classic"});
 function load(){try{const v=JSON.parse(localStorage.getItem(K));return v&&Array.isArray(v.deck)&&Array.isArray(v.extra)&&v.owned?Object.assign(start(),v):start();}catch(_){return start();}}
 let save=load(),game=null,selected=null,attackSource=-1,page="home",serial=0;
 const card=id=>RELIC_BY_ID[id];
@@ -67,7 +67,31 @@ function valid(){
  if(save.deck.some(id=>!card(id)||card(id).type==="fusion")||save.extra.some(id=>!card(id)||card(id).type!=="fusion"))return false;
  return [...new Set([...save.deck,...save.extra])].every(id=>inDeck(id)<=Math.min(count(id),3));
 }
+function chooseStarter(id){
+ const archetype=RELIC_STARTERS.find(x=>x.id===id);
+ if(!archetype)return;
+ if(game&&!game.winner)return toast("Finish the current duel before switching your deck.");
+ if(!confirm("Switch to "+archetype.name+"? This replaces the active deck but keeps your collection."))return;
+ save.starter=id;save.deck=archetype.deck.slice();save.extra=archetype.extra.slice();
+ const required={};[...save.deck,...save.extra].forEach(cid=>required[cid]=(required[cid]||0)+1);
+ for(const [cid,n] of Object.entries(required))save.owned[cid]=Math.max(count(cid),n);
+ SAVE();render();toast(archetype.name+" is now your active deck!");
+}
+function renderStarterChoices(){
+ let holder=$("starter-choices");
+ if(!holder){
+  holder=document.createElement("div");holder.id="starter-choices";holder.className="starter-grid";
+  const heading=document.createElement("div");heading.className="section-heading";heading.innerHTML='<div><span class="eyebrow">CHOOSE A CHAMPION</span><h2>Five Starter Decks</h2></div>';
+  const page=document.getElementById("page-deck");const layout=page.querySelector(".deck-layout");
+  layout.before(heading,holder);
+ }
+ holder.innerHTML=RELIC_STARTERS.map(x=>{
+  const commander=card(x.commander);
+  return '<article class="starter-choice '+(save.starter===x.id?"current":"")+'"><div class="commander-illustration">'+commander.icon+'</div><small>'+x.style+'</small><h3>'+x.name+'</h3><p>'+x.description+'</p><small>COMMANDER: '+commander.name+'</small><button data-starter="'+x.id+'">'+(save.starter===x.id?"SELECTED ✓":"SELECT STARTER")+'</button></article>';
+ }).join("");
+}
 function deck(){
+ renderStarterChoices();
  const q=$("deck-search").value.trim().toLowerCase(),f=$("deck-filter").value;
  const a=RELIC_CARDS.filter(c=>count(c.id)>0&&(f==="all"||c.type===f)&&c.name.toLowerCase().includes(q));
  $("deck-library").innerHTML=a.map(c=>'<div class="deck-item"><div class="deck-mini">'+c.icon+'</div><div class="deck-item-meta"><strong>'+c.name+'</strong><small>'+label(c)+' • '+c.type+' • Owned '+count(c.id)+'</small></div><div class="qty-actions"><button data-deck-remove="'+c.id+'">−</button><b>'+inDeck(c.id)+'</b><button data-deck-add="'+c.id+'">+</button></div></div>').join("")||'<div class="empty-state">No cards found.</div>';
@@ -96,7 +120,7 @@ function canNormal(s,id){const p=mine(s),n=tributeCount(id);return !p.normalUsed
 function entity(id,pos="attack"){return{id,pos,played:game.round,attacked:false,moved:false,atkBonus:0};}
 function spawn(s,id,pos,normal){
  const p=mine(s),at=free(p.monsters);if(at<0)return false;
- p.monsters[at]=entity(id,pos);
+ p.monsters[at]=entity(id,pos);game.fx={side:s,zone:"monster",i:at,kind:pos==="set"?"set":"summon"};
  if(normal)p.normalUsed=true;
  const c=card(id);
  log((s==="you"?"You":"Warden")+(pos==="set"?" Set ":" summoned ")+c.name+".");
@@ -116,7 +140,7 @@ function destroy(s,i){
  p.monsters[i]=null;p.grave.push(m.id);log(card(m.id).name+" was destroyed.");
  if(card(m.id).effect==="heal-on-destroy"){p.lp+=300;log("+300 LP from Mossbound Guard.");}
 }
-function setBackrow(s,i){const p=mine(s),id=p.hand[i],c=card(id);if(!c||!["spell","trap"].includes(c.type)||free(p.spells)<0)return toast("No empty Spell/Trap zone.");p.spells[free(p.spells)]={id,setTurn:game.round};p.hand.splice(i,1);log((s==="you"?"You":"Warden")+" Set a card.");selected=null;showDuel();}
+function setBackrow(s,i){const p=mine(s),id=p.hand[i],c=card(id);if(!c||!["spell","trap"].includes(c.type)||free(p.spells)<0)return toast("No empty Spell/Trap zone.");const slot=free(p.spells);p.spells[slot]={id,setTurn:game.round};p.hand.splice(i,1);game.fx={side:s,zone:"spell",i:slot,kind:c.type==="trap"?"trap":"set"};log((s==="you"?"You":"Warden")+" Set a card.");selected=null;showDuel();}
 function materialPosition(s,id,used){
  const p=mine(s);
  for(let i=0;i<p.hand.length;i++)if(p.hand[i]===id&&!used.some(x=>x.where==="hand"&&x.i===i))return {where:"hand",i};
@@ -136,7 +160,7 @@ function fusion(s,where,i,fusionId){
  if(where==="set")p.spells[i]=null;
  p.grave.push("relic-fusion",...card(fusionId).materials);
  p.extra.splice(p.extra.indexOf(fusionId),1);
- spawn(s,fusionId,"attack",false);
+ spawn(s,fusionId,"attack",false);if(game.fx)game.fx.kind="fusion";
  log("FUSION! "+card(fusionId).materials.map(id=>card(id).name).join(" + ")+" → "+card(fusionId).name);
  selected=null;showDuel();
 }
@@ -148,7 +172,7 @@ function cast(s,where,i){
  if(c.effect==="revive"&&(free(p.monsters)<0||!p.grave.some(id=>card(id).type==="monster"&&card(id).level<=4)))return toast("No Level 4 or lower monster to revive.");
  if(c.effect.startsWith("buff")&&!p.monsters.some(m=>m&&m.pos==="attack"))return toast("No Attack Position monster.");
  if(where==="hand")p.hand.splice(i,1);else p.spells[i]=null;p.grave.push(id);
- log((s==="you"?"You":"Warden")+" activated "+c.name+".");
+ game.fx={side:s,zone:"spell",i:-1,kind:"spell"};log((s==="you"?"You":"Warden")+" activated "+c.name+".");
  switch(c.effect){
  case "heal800":p.lp+=800;break;case "heal500":p.lp+=500;break;
  case "burn500":hit(enemy(s),500);break;case "burn700":hit(enemy(s),700);break;
@@ -178,7 +202,7 @@ function attack(s,from,to){
   if(e==="snare"&&card(m.id).atk+m.atkBonus>1800)continue;
   if(e==="collapse"&&card(m.id).atk+m.atkBonus>2200)continue;
   if(e==="guard"&&to<0)continue;
-  d.spells[k]=null;d.grave.push(t.id);log("TRAP! "+card(t.id).name+" activated.");
+  d.spells[k]=null;d.grave.push(t.id);game.fx={side:enemy(s),zone:"spell",i:-1,kind:"trap"};log("TRAP! "+card(t.id).name+" activated.");
   if(e==="snare"||e==="collapse"){destroy(s,from);showDuel();return;}
   if(e==="negate-attack"){showDuel();return;}
   if(e==="veil"){d.lp+=300;showDuel();return;}
@@ -216,6 +240,7 @@ function phaseNext(){
 function turnEnd(){
  if(!game||game.winner||game.turn!=="you")return;
  log("Your turn ends.");game.turn="ai";game.phase="main1";selected=null;attackSource=-1;
+ draw("ai",1);if(game.winner){showDuel();return;}
  showDuel();setTimeout(aiTurn,350);
 }
 function aiTurn(){
@@ -310,6 +335,18 @@ function showDuel(){
  $("player-hand").innerHTML=a.hand.map((id,i)=>'<div data-hand="'+i+'" class="'+(selected&&selected.kind==="hand"&&selected.i===i?"selected":"")+'">'+cardHTML(card(id))+'</div>').join("");
  $("hand-count").textContent=a.hand.length+" CARDS";
  $("selected-panel").innerHTML=actions();
+ if(game.fx){
+  const fx=game.fx;game.fx=null;
+  const zoneId=fx.zone==="monster"?(fx.side==="you"?"player-monsters":"enemy-monsters"):(fx.side==="you"?"player-spells":"enemy-spells");
+  const zone=document.getElementById(zoneId);
+  const node=fx.i<0?null:zone.querySelector('[data-'+(fx.zone==="monster"?"zone":"backrow")+'="'+fx.side+'-'+fx.i+'"]');
+  if(node)node.classList.add("relic-enter-"+fx.kind);
+  else{
+    const arena=document.querySelector(".arena");const burst=document.createElement("div");
+    burst.className="relic-effect-burst "+fx.kind;burst.textContent=fx.kind==="spell"?"✦":"✧";
+    arena.appendChild(burst);setTimeout(()=>burst.remove(),850);
+  }
+ }
  $("duel-log").innerHTML=game.logs.slice(0,20).map(s=>'<div class="log-item">'+s+'</div>').join("");
  $("advance-phase").disabled=game.turn!=="you"||!!game.winner;
  $("end-turn").disabled=game.turn!=="you"||!!game.winner;
@@ -322,6 +359,7 @@ function clickEvent(ev){
  if((x=attr("[data-go]")))return route(x.dataset.go);
  if((x=attr("[data-inspect]")))return showCard(card(x.dataset.inspect));
  if((x=attr("[data-buy]")))return buy(x.dataset.buy);
+ if((x=attr("[data-starter]")))return chooseStarter(x.dataset.starter);
  if((x=attr("[data-deck-add]")))return changeDeck(x.dataset.deckAdd,1);
  if((x=attr("[data-deck-remove]")))return changeDeck(x.dataset.deckRemove,-1);
  if((x=attr("[data-shop-tab]"))){document.querySelectorAll(".tab").forEach(y=>y.classList.toggle("active",y===x));document.querySelectorAll(".shop-section").forEach(y=>y.classList.toggle("hidden",y.id!=="shop-"+x.dataset.shopTab));return;}
