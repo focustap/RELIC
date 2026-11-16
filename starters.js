@@ -4,7 +4,7 @@ const RELIC_STARTERS = [
  {id:"ember",name:"Ember Vanguard",style:"Aggro",commander:"emberlord",
   description:"Fast pressure with flame creatures, direct-damage spells and explosive Fusion finishers.",
   extra:["emberstone-colossus","sunfire-predator"],
-  picks:[["emberlord",1],["ember-squire",3],["flame-lynx",3],["sunscale",3],["ashen-knight",2],["thunder-kestrel",2],["dusk-scout",2],["ironjack",2],["stonebound-golem",2],["spark-bolt",3],["flame-pulse",1],["relic-fusion",3],["runic-blade",2],["fog-screen",2],["ember-rebuke",2],["ambush-snare",2],["arcane-insight",1],["mending-light",2]]},
+  picks:[["emberlord",1],["ember-squire",3],["flame-lynx",3],["sunscale",3],["ashen-knight",2],["thunder-kestrel",2],["dusk-scout",2],["ironjack",2],["dune-ranger",2],["stonebound-golem",2],["spark-bolt",3],["flame-pulse",1],["relic-fusion",3],["runic-blade",2],["fog-screen",2],["ember-rebuke",2],["ambush-snare",2],["arcane-insight",1],["mending-light",2]]},
  {id:"verdant",name:"Verdant Bastion",style:"Defense",commander:"verdant-templar",
   description:"Durable guardians, healing and traps that outlast aggressive opponents.",
   extra:["verdant-leviathan","warden-of-roots"],
