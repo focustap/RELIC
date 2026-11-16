@@ -108,7 +108,7 @@ function runApp(){
 test("Browser smoke: Duel Arena navigation is clickable",()=>{
  const app=runApp();
  const target={closest(selector){
-  if(!/^\\[data-[a-z-]+\\]$/.test(selector))throw new Error("Malformed CSS selector: "+selector);
+  if(selector!=="[data-page]")throw new Error("Unexpected selector: "+selector);
   return selector==="[data-page]"?{dataset:{page:"duel"}}:null;
  }};
  assert.doesNotThrow(()=>app.__click({target}));
