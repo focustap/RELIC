@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 430">
+<defs>
+ <linearGradient id="back" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#263a53"/><stop offset=".46" stop-color="#0d192a"/><stop offset="1" stop-color="#3d3140"/></linearGradient>
+ <radialGradient id="halo"><stop stop-color="#f8dc9b" stop-opacity=".36"/><stop offset=".6" stop-color="#8eafd2" stop-opacity=".08"/><stop offset="1" stop-color="#1e2c3f" stop-opacity="0"/></radialGradient>
+ <linearGradient id="metal" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f5e1ac"/><stop offset=".5" stop-color="#b18a4d"/><stop offset="1" stop-color="#e4c487"/></linearGradient>
+ <pattern id="grid" width="23" height="23" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><path d="M0 0V23M0 0H23" stroke="#9fb7da" stroke-opacity=".12" fill="none" stroke-width="1"/></pattern>
+</defs>
+<rect width="300" height="430" rx="10" fill="#080f18"/>
+<rect x="8" y="8" width="284" height="414" rx="8" fill="url(#back)" stroke="url(#metal)" stroke-width="4"/>
+<rect x="16" y="16" width="268" height="398" rx="5" fill="url(#grid)" stroke="#9c7b46" stroke-width="1.5"/>
+<rect x="28" y="28" width="244" height="374" rx="3" fill="none" stroke="#ad936a" stroke-opacity=".7"/>
+<circle cx="150" cy="200" r="124" fill="url(#halo)"/>
+<circle cx="150" cy="200" r="104" fill="none" stroke="url(#metal)" stroke-width="2"/>
+<circle cx="150" cy="200" r="86" fill="none" stroke="#e9c788" stroke-opacity=".65" stroke-width="1" stroke-dasharray="3 8"/>
+<path d="M150 94L184 167 258 200 184 233 150 306 116 233 42 200 116 167Z" fill="none" stroke="url(#metal)" stroke-width="4" stroke-linejoin="round"/>
+<path d="M150 122L175 176 228 200 175 224 150 278 125 224 72 200 125 176Z" fill="#e4c489" fill-opacity=".1" stroke="#ebc47b" stroke-width="1"/>
+<path d="M150 149L164 187 202 200 164 213 150 251 136 213 98 200 136 187Z" fill="url(#metal)"/>
+<path d="M150 176L159 193 176 200 159 207 150 224 141 207 124 200 141 193Z" fill="#1b2c41"/>
+<g fill="url(#metal)"><circle cx="150" cy="58" r="3"/><circle cx="150" cy="342" r="3"/><circle cx="44" cy="200" r="3"/><circle cx="256" cy="200" r="3"/></g>
+<path d="M40 49h49m122 0h49M40 381h49m122 0h49" stroke="#b79a64" stroke-width="2"/>
+<text x="150" y="350" text-anchor="middle" fill="#f4dba9" font-family="Georgia,serif" font-size="34" font-weight="700" letter-spacing="6">RELIC</text>
+<text x="150" y="373" text-anchor="middle" fill="#c6ab7e" font-family="Arial,sans-serif" font-size="8" font-weight="600" letter-spacing="3">FORGE YOUR LEGEND</text>
+</svg>
