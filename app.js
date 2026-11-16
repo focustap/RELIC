@@ -353,7 +353,7 @@ function showDuel(){
 }
 function clickEvent(ev){
  const t=ev.target;
- const attr=(key)=>t.closest("["+key+"]");
+ const attr=(selector)=>t.closest(selector);
  let x;
  if((x=attr("[data-page]")))return route(x.dataset.page);
  if((x=attr("[data-go]")))return route(x.dataset.go);
@@ -398,10 +398,7 @@ function wire(){
  const big=document.createElement("div");big.className="phase-buttons pack-upgrades";big.innerHTML='<button class="btn btn-outline btn-small" data-bundle="12">12 CARDS — 22 GOLD</button><button class="btn btn-outline btn-small" data-bundle="25">25 CARDS — 40 GOLD</button>';
  packBtn.after(big);
  big.addEventListener("click",e=>{const button=e.target.closest("[data-bundle]");if(!button)return;const n=Number(button.dataset.bundle);openPack(n,n===12?22:40);});
- const fields=["credits-header","shop-credits"];
- for(const id of fields)$(id).closest(id==="credits-header"?".coin-balance":".shop-balance").innerHTML=$(id).closest(id==="credits-header"?".coin-balance":".shop-balance").innerHTML.replaceAll("SHARDS","GOLD");
- document.querySelectorAll("p,small,button,li,.stat-card span").forEach(el=>{if(el.children.length===0&&el.textContent.includes("shards"))el.textContent=el.textContent.replaceAll("shards","Gold").replaceAll("Shards","Gold");});
- document.querySelectorAll("[data-go]").forEach(()=>{});
+ // All labels use Gold directly in the HTML; do not rewrite live DOM nodes here.
  const hash=location.hash.replace("#","");route(NAMES[hash]?hash:"home");
 }
 wire();
