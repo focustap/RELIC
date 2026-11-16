@@ -283,7 +283,7 @@ function miniZone(m,s,i){
 }
 function backrowZone(m,s,i){
  if(!m)return '<div class="zone" data-backrow="'+s+'-'+i+'"></div>';
- if(s==="ai"||card(m.id).type==="trap")return '<div class="zone filled" data-backrow="'+s+'-'+i+'"><div class="set-card" aria-label="Face-down RELIC card"><span>RELIC</span></div></div>';
+ if(m)return '<div class="zone filled" data-backrow="'+s+'-'+i+'"><div class="set-card" aria-label="Face-down RELIC card"><span>RELIC</span></div></div>';
  return '<div class="zone filled" data-backrow="'+s+'-'+i+'">'+cardHTML(card(m.id))+'</div>';
 }
 function actions(){
