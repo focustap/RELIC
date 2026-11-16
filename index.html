@@ -7,6 +7,7 @@
   <meta name="description" content="RELIC — a classic monster dueling card game. Open packs, build a deck, and battle.">
   <title>RELIC — Forge Your Legend</title>
   <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./effects.css">
 </head>
 <body>
   <div class="app-shell">
@@ -26,7 +27,7 @@
     <div class="main-shell">
       <header class="topbar">
         <div class="crumb">THE SANCTUM <span>/</span> <b id="page-crumb">DASHBOARD</b></div>
-        <div class="top-actions"><span class="edition-tag">FIRST EDITION</span><span class="coin-balance"><span>◈</span><b id="credits-header">0</b> SHARDS</span></div>
+        <div class="top-actions"><span class="edition-tag">FIRST EDITION</span><span class="coin-balance"><span>◈</span><b id="credits-header">0</b> GOLD</span></div>
       </header>
       <main>
         <section id="page-home" class="page active">
@@ -40,16 +41,16 @@
           <div class="dashboard-grid">
             <div class="stat-card"><span>YOUR COLLECTION</span><strong id="home-owned">0</strong><small>unique cards discovered</small><div class="meter"><i id="collection-meter"></i></div></div>
             <div class="stat-card"><span>DUEL RECORD</span><strong id="home-record">0W / 0L</strong><small>against the Sanctum Warden</small><div class="stat-mini">⚔ &nbsp; Practice makes powerful</div></div>
-            <div class="stat-card daily"><span>DAILY SHARD CACHE</span><strong>+120 ◈</strong><small>Free currency, once per local day</small><button id="claim-daily" class="btn btn-small btn-gold">CLAIM REWARD</button></div>
+            <div class="stat-card daily"><span>DAILY GOLD CACHE</span><strong>+10 ◈</strong><small>Free currency, once per local day</small><button id="claim-daily" class="btn btn-small btn-gold">CLAIM REWARD</button></div>
           </div>
           <div class="section-heading"><div><span class="eyebrow">DISCOVER RELIC</span><h2>Choose your path</h2></div></div>
           <div class="feature-grid"><button data-go="duel" class="feature feature-duel"><span class="feature-icon">⚔</span><h3>Enter the Arena</h3><p>Face the Warden in turn-based combat.</p><b>PLAY NOW ↗</b></button><button data-go="packs" class="feature feature-packs"><span class="feature-icon">✧</span><h3>Expand Your Arsenal</h3><p>Open packs or buy specific starter cards.</p><b>VISIT SHOP ↗</b></button><button data-go="deck" class="feature feature-deck"><span class="feature-icon">▤</span><h3>Craft Your Strategy</h3><p>Build a 40–60 card main deck and fusion extra deck.</p><b>BUILD A DECK ↗</b></button></div>
         </section>
         <section id="page-packs" class="page">
-          <div class="page-head"><div><div class="eyebrow">THE MERCHANT'S VAULT</div><h1>Card <em>Shop</em></h1><p>Earn shards by dueling, then grow your collection. No real-money purchases.</p></div><div class="shop-balance">YOUR SHARDS <strong id="shop-credits">0 ◈</strong></div></div>
+          <div class="page-head"><div><div class="eyebrow">THE MERCHANT'S VAULT</div><h1>Card <em>Shop</em></h1><p>Earn shards by dueling, then grow your collection. No real-money purchases.</p></div><div class="shop-balance">YOUR GOLD <strong id="shop-credits">0 ◈</strong></div></div>
           <div class="shop-tabs"><button class="tab active" data-shop-tab="boosters">Booster Packs</button><button class="tab" data-shop-tab="singles">Individual Cards</button></div>
           <div id="shop-boosters" class="shop-section">
-            <div class="pack-layout"><div class="pack-art"><div class="pack-shine"></div><div class="pack-sigil">✧</div><strong>RELIC</strong><small>FIRST EDITION</small><div class="pack-footer">5 RANDOM CARDS</div></div><div class="pack-details"><span class="eyebrow">FIRST EDITION • BOOSTER 001</span><h2>Echoes of the <em>Ancients</em></h2><p>Five original cards drawn from the First Edition pool, with at least one Rare-or-better slot. Duplicate cards can power up your deck or expand your options.</p><ul><li>3 Common slots</li><li>1 Uncommon-or-better slot</li><li>1 Rare-or-better slot (small Epic chance)</li></ul><button id="open-pack" class="btn btn-gold">◈ &nbsp; OPEN PACK — 90 SHARDS</button><p class="fineprint">Card rarity affects collectibility, not raw power.</p></div></div>
+            <div class="pack-layout"><div class="pack-art"><div class="pack-shine"></div><div class="pack-sigil">✧</div><strong>RELIC</strong><small>FIRST EDITION</small><div class="pack-footer">5 RANDOM CARDS</div></div><div class="pack-details"><span class="eyebrow">FIRST EDITION • BOOSTER 001</span><h2>Echoes of the <em>Ancients</em></h2><p>Five original cards drawn from the First Edition pool, with at least one Rare-or-better slot. Duplicate cards can power up your deck or expand your options.</p><ul><li>3 Common slots</li><li>1 Uncommon-or-better slot</li><li>1 Rare-or-better slot (small Epic chance)</li></ul><button id="open-pack" class="btn btn-gold">◈ &nbsp; OPEN PACK — 90 GOLD</button><p class="fineprint">Card rarity affects collectibility, not raw power.</p></div></div>
           </div>
           <div id="shop-singles" class="shop-section hidden"><div class="section-heading"><div><span class="eyebrow">BUILD A FOUNDATION</span><h2>Individual Cards</h2></div></div><p class="fineprint shop-intro">Every basic Common and Uncommon is available directly. No hunting packs for the fundamentals.</p><div id="singles-grid" class="card-grid"></div></div>
         </section>
@@ -63,7 +64,7 @@
         </section>
         <section id="page-duel" class="page">
           <div class="page-head duel-head"><div><div class="eyebrow">THE DUELING GROUNDS</div><h1>Duel <em>Arena</em></h1><p>Challenge the Sanctum Warden. A turn-based solo duel with a classic field.</p></div><div class="duel-header-actions"><button id="new-duel" class="btn btn-gold">⚔ &nbsp; NEW DUEL</button></div></div>
-          <div id="duel-idle" class="duel-idle"><div class="idle-mark">⚔</div><h2>Ready to test your deck?</h2><p>Bring 40–60 cards and challenge the Warden. Win for 120 shards or earn 35 just for finishing a duel.</p><button id="idle-start" class="btn btn-gold">BEGIN DUEL</button></div>
+          <div id="duel-idle" class="duel-idle"><div class="idle-mark">⚔</div><h2>Ready to test your deck?</h2><p>Bring 40–60 cards and challenge the Warden. Win for 10 Gold or earn 2 Gold for a loss.</p><button id="idle-start" class="btn btn-gold">BEGIN DUEL</button></div>
           <div id="duel-play" class="hidden">
             <div class="duel-status"><span id="duel-turn">TURN 1 — YOUR TURN</span><span id="duel-phase">MAIN PHASE 1</span><span id="duel-round" class="edition-tag">FIRST EDITION</span></div>
             <div class="arena"><div class="arena-player enemy"><div class="player-badge"><span class="avatar">♜</span><div><b>Sanctum Warden</b><span>OPPONENT</span></div></div><div class="lp"><strong id="enemy-lp">8000</strong><span>LP</span></div></div><div id="enemy-hand" class="enemy-hand"></div>
@@ -98,6 +99,7 @@
   <div id="pack-reveal" class="modal hidden" role="dialog" aria-modal="true" aria-label="Pack reveal"><div class="modal-backdrop" data-close-pack></div><div class="reveal-body"><button class="modal-close" data-close-pack>×</button><span class="eyebrow">THE VAULT HAS OPENED</span><h2>Your new <em>relics</em></h2><div id="reveal-cards" class="reveal-cards"></div><button class="btn btn-gold" data-close-pack>ADD TO COLLECTION</button></div></div>
   <div class="toast-wrap" id="toasts" role="status" aria-live="polite"></div>
   <script src="./cards.js"></script>
+  <script src="./starters.js"></script>
   <script src="./app.js"></script>
 </body>
 </html>
