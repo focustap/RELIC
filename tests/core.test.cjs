@@ -89,18 +89,31 @@ function mockElement(id){
  return e;
 }
 function runApp(){
+ const listeners={};
  const dom=new Map(),document={
   getElementById(id){if(!dom.has(id))dom.set(id,mockElement(id));return dom.get(id);},
   querySelector(){return mockElement("arena")},querySelectorAll(){return []},
-  createElement(tag){return mockElement(tag)},addEventListener(){}};
+  createElement(tag){return mockElement(tag)},addEventListener(type,callback){listeners[type]=callback}};
  const cache={};
  const localStorage={getItem(k){return cache[k]||null},setItem(k,v){cache[k]=v}};
  const code=read("app.js").replace(/wire\(\);\s*\}\)\(\);\s*$/,'wire();return {begin,phaseNext,turnEnd,aiTurn,openPack,chooseStarter,valid,save:()=>save,game:()=>game,cast,attack,fusion};})();');
  assert.ok(code.includes("return {begin,phaseNext"));
  const script="(function(){"+source+"\nreturn (function(){return "+code.replace(/^\/\*[\s\S]*?\*\/\s*/,"")+";})();})();";
  const context={document,window:{scrollTo(){}},location:{hash:""},localStorage,confirm:()=>true,setTimeout:()=>0,console,Math,Date};
- return vm.runInNewContext(script,context);
+ const app=vm.runInNewContext(script,context);
+ app.__click=event=>listeners.click(event);
+ app.__location=context.location;
+ return app;
 }
+test("Browser smoke: Duel Arena navigation is clickable",()=>{
+ const app=runApp();
+ const target={closest(selector){
+  if(!/^\\[data-[a-z-]+\\]$/.test(selector))throw new Error("Malformed CSS selector: "+selector);
+  return selector==="[data-page]"?{dataset:{page:"duel"}}:null;
+ }};
+ assert.doesNotThrow(()=>app.__click({target}));
+ assert.equal(app.__location.hash,"duel");
+});
 test("Browser smoke: starting deck selector and solo opening state",()=>{
  const app=runApp();
  assert.equal(app.valid(),true);
