@@ -24,3 +24,10 @@
 @media(max-width:1199px){.starter-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:640px){.starter-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(prefers-reduced-motion:reduce){.zone.relic-enter-summon,.zone.relic-enter-set,.zone.relic-enter-spell,.zone.relic-enter-trap,.zone.relic-enter-fusion{animation:none!important}}
+
+.arena{position:relative}
+.relic-effect-burst{position:absolute;left:50%;top:46%;font:110px Georgia,serif;pointer-events:none;transform:translate(-50%,-50%);z-index:12;animation:spellBurst .8s ease-out forwards;text-shadow:0 0 40px #79fbe9}
+.relic-effect-burst.trap{color:#db96f4;text-shadow:0 0 40px #bd6ade}
+.relic-effect-burst.spell{color:#92e6df}
+@keyframes spellBurst{0%{opacity:0;transform:translate(-50%,-50%) scale(.1) rotate(-70deg)}40%{opacity:1;transform:translate(-50%,-50%) scale(1.5) rotate(15deg)}100%{opacity:0;transform:translate(-50%,-50%) scale(2.2) rotate(45deg)}}
+@media(prefers-reduced-motion:reduce){.relic-effect-burst{animation:none;display:none}}
