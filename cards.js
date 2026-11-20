@@ -5,7 +5,7 @@ const TRAP = (id,name,rarity,icon,description,effect) => ({id,name,type:"trap",r
 const FUSION = (id,name,level,atk,def,rarity,icon,element,materials,description,effect="") => ({id,name,type:"fusion",level,atk,def,rarity,icon,element,materials,description,effect});
 const RELIC_CARDS = [
   MON("ember-squire","Ember Squire",4,1700,1100,"common","⚔️","Fire","A steadfast warrior forged in the first flame."),
-  MON("mossbound-guard","Mossbound Guard",4,1200,1900,"common","🌿","Earth","Its bark is as patient as the oldest forest.","heal-on-destroy"),
+  MON("mossbound-guard","Mossbound Guard",4,1200,1900,"common","🌿","Earth","When destroyed: gain 300 HP. Its bark is as patient as the oldest forest.","heal-on-destroy"),
   MON("tide-runner","Tide Runner",4,1600,1200,"common","🌊","Water","No current can outpace its silver fins."),
   MON("dusk-scout","Dusk Scout",3,1400,1000,"common","🦉","Shadow","Sees the danger before it arrives."),
   MON("stonebound-golem","Stonebound Golem",4,1800,1400,"common","🪨","Earth","An ancient guardian awakened by forgotten words."),
@@ -20,7 +20,7 @@ const RELIC_CARDS = [
   MON("sunscale","Sunscale Drake",4,1800,1200,"common","🐉","Fire","Young dragon, fierce heart."),
   MON("opal-wisp","Opal Wisp",1,300,800,"common","✨","Arcane","The first light of a newborn relic."),
   MON("blade-dancer","Blade Dancer",4,1650,1450,"uncommon","🗡️","Metal","Swift strikes hide a careful strategy."),
-  MON("rune-medic","Rune Medic",3,1100,1500,"uncommon","💠","Arcane","When Normal Summoned: gain 400 LP.","heal-on-summon"),
+  MON("rune-medic","Rune Medic",3,1100,1500,"uncommon","💠","Arcane","When Normal Summoned: gain 400 HP.","heal-on-summon"),
   MON("river-serpent","River Serpent",4,1900,1000,"uncommon","🐍","Water","The river bends where it travels."),
   MON("moon-archer","Moon Archer",4,1600,1500,"uncommon","🌙","Shadow","A single arrow under the crescent moon."),
   MON("ashen-knight","Ashen Knight",5,2200,1800,"uncommon","♞","Fire","Tribute 1 monster to summon this wandering champion."),
@@ -35,22 +35,22 @@ const RELIC_CARDS = [
   MON("relic-sentinel","Relic Sentinel",8,2850,2500,"epic","🗿","Metal","The ancient vault's final defender."),
   MON("starweaver","Starweaver",7,2650,2350,"epic","🌠","Arcane","Stars obey its patient hands."),
   SPELL("relic-fusion","Relic Fusion","common","✧","Combine the exact named materials from your hand or field to summon a Fusion Monster from your Extra Deck.","fusion"),
-  SPELL("mending-light","Mending Light","common","💛","Gain 800 Life Points.","heal800"),
+  SPELL("mending-light","Mending Light","common","💛","Gain 800 HP.","heal800"),
   SPELL("spark-bolt","Spark Bolt","common","⚡","Deal 500 damage to your opponent.","burn500"),
   SPELL("runic-blade","Runic Blade","common","🗡️","Give one of your Attack Position monsters +400 ATK until this turn ends.","buff400"),
   SPELL("arcane-insight","Arcane Insight","common","📜","Draw 1 card.","draw1"),
-  SPELL("quiet-rain","Quiet Rain","common","💧","Gain 500 Life Points.","heal500"),
-  SPELL("ancient-map","Ancient Map","uncommon","🗺️","Draw 1 card. Then gain 200 LP.","insight"),
+  SPELL("quiet-rain","Quiet Rain","common","💧","Gain 500 HP.","heal500"),
+  SPELL("ancient-map","Ancient Map","uncommon","🗺️","Draw 1 card. Then gain 200 HP.","insight"),
   SPELL("shatterspell","Shatterspell","uncommon","💥","Destroy one enemy face-up monster with 1600 or less ATK.","shatter"),
   SPELL("returning-echo","Returning Echo","uncommon","🔁","Special Summon one Level 4 or lower monster from your Graveyard in Defense Position.","revive"),
   SPELL("flame-pulse","Flame Pulse","rare","☄️","Deal 700 damage to your opponent.","burn700"),
-  SPELL("solar-aegis","Solar Aegis","rare","☀️","Give a monster +600 ATK until the end of this turn.","buff600"),
+  SPELL("solar-aegis","Solar Aegis","rare","☀️","Give one of your Attack Position monsters +600 ATK until this turn ends.","buff600"),
   TRAP("fog-screen","Fog Screen","common","🌫️","When an opponent attacks: negate that attack.","negate-attack"),
   TRAP("ambush-snare","Ambush Snare","common","🪤","When attacked: destroy the attacker if it has 1800 ATK or less.","snare"),
   TRAP("final-stand","Final Stand","common","🛡️","When attacked: reduce the battle damage you would take to 0.","shield"),
   TRAP("ember-rebuke","Ember Rebuke","common","🔥","When attacked: inflict 350 damage to your opponent, then continue the battle.","rebuke"),
-  TRAP("guardian-bond","Guardian Bond","uncommon","🔗","When attacked: give your defending monster +500 DEF for this battle.","guard"),
-  TRAP("nightfall-veil","Nightfall Veil","uncommon","🌑","When attacked: negate the attack and gain 300 LP.","veil"),
+  TRAP("guardian-bond","Guardian Bond","uncommon","🔗","When your Defense Position monster is attacked: give it +500 DEF for this battle.","guard"),
+  TRAP("nightfall-veil","Nightfall Veil","uncommon","🌑","When attacked: negate the attack and gain 300 HP.","veil"),
   TRAP("rune-collapse","Rune Collapse","rare","💢","When attacked: destroy an attacking monster with 2200 ATK or less.","collapse"),
   FUSION("emberstone-colossus","Emberstone Colossus",7,2650,2350,"rare","🌋","Fire",["ember-squire","stonebound-golem"],"Ember Squire + Stonebound Golem. Two wills become a mountain of flame."),
   FUSION("verdant-leviathan","Verdant Leviathan",7,2600,2550,"rare","🐲","Water",["tide-runner","mossbound-guard"],"Tide Runner + Mossbound Guard. The forest and the sea remember one another."),
@@ -58,6 +58,13 @@ const RELIC_CARDS = [
   FUSION("lunar-knight","Lunar Knight",7,2700,2150,"epic","🌘","Shadow",["moon-archer","nightblade"],"Moon Archer + Nightblade. A perfect strike in complete darkness."),
   FUSION("warden-of-roots","Warden of Roots",8,2900,2800,"epic","🌲","Earth",["root-giant","glade-stag"],"Root Giant + Glade Stag. The forest itself takes a stand.")
 ];
+// Artwork is a separate bitmap. Frames, labels and statistics are rendered by code.
+const CREATURE_TYPES={"ember-squire":"Warrior","mossbound-guard":"Plant","tide-runner":"Aquatic","dusk-scout":"Winged Beast","stonebound-golem":"Golem","arcane-apprentice":"Spellcaster","flame-lynx":"Beast","glade-stag":"Beast","dune-ranger":"Warrior","mist-sprite":"Spirit","ironjack":"Machine","frostcap":"Fiend","thorn-hound":"Beast","sunscale":"Dragon","opal-wisp":"Spirit","blade-dancer":"Warrior","rune-medic":"Spellcaster","river-serpent":"Serpent","moon-archer":"Warrior","ashen-knight":"Warrior","root-giant":"Plant","glass-mage":"Spellcaster","thunder-kestrel":"Winged Beast","nightblade":"Warrior","verdant-templar":"Warrior","emberlord":"Warrior","abyss-whale":"Aquatic","skybreaker":"Winged Beast","relic-sentinel":"Machine","starweaver":"Spellcaster","emberstone-colossus":"Golem","verdant-leviathan":"Dragon","sunfire-predator":"Beast / Dragon","lunar-knight":"Warrior","warden-of-roots":"Plant / Beast"};
+for(const c of RELIC_CARDS){
+ c.artwork='./public/assets/cards/'+c.id+'.webp';
+ c.creatureType=CREATURE_TYPES[c.id]||null;
+ c.category=c.type==='monster'?(c.effect?'effect-monster':'normal-monster'):c.type;
+}
 const RELIC_BY_ID = Object.fromEntries(RELIC_CARDS.map(card=>[card.id,card]));
 const STARTER_LIST = {
   "ember-squire":3,"mossbound-guard":3,"tide-runner":3,"dusk-scout":3,
@@ -69,4 +76,4 @@ const STARTER_LIST = {
 const STARTER_DECK = Object.entries(STARTER_LIST).flatMap(([id,count])=>Array(count).fill(id));
 const STARTER_EXTRA = ["emberstone-colossus","verdant-leviathan"];
 const RARITY_ORDER = ["common","uncommon","rare","epic"];
-const SINGLE_PRICES = {common:30,uncommon:70,rare:140,epic:240};
+const SINGLE_PRICES = {common:4,uncommon:8};

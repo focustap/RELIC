@@ -4,9 +4,17 @@
   "private": true,
   "description": "RELIC — an original classic-style monster dueling website",
   "scripts": {
-    "test": "node --test tests/*.test.cjs"
+    "test": "node --test tests/*.test.cjs",
+    "start": "node scripts/serve.cjs",
+    "test:browser": "playwright test",
+    "build": "node scripts/build.cjs",
+    "review:art": "node scripts/review-art.cjs"
   },
   "engines": {
     "node": ">=20"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.65.1",
+    "sharp": "^0.35.5"
   }
 }

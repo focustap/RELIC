@@ -1,0 +1,323 @@
+{
+  "generator": "built-in image_gen",
+  "illustrations": [
+    {
+      "id": "ember-squire",
+      "path": "./public/assets/cards/ember-squire.webp",
+      "bytes": 172660,
+      "sha256": "739c7c24ec4c09313871e6902cd09d30b7f6374a2e2a191904f4af98a20e47f6"
+    },
+    {
+      "id": "mossbound-guard",
+      "path": "./public/assets/cards/mossbound-guard.webp",
+      "bytes": 215660,
+      "sha256": "0510a0ab24a6b618227e93101f8522faf3dc9ec0933155f68a2a602578092bde"
+    },
+    {
+      "id": "tide-runner",
+      "path": "./public/assets/cards/tide-runner.webp",
+      "bytes": 189866,
+      "sha256": "e7a1482aad5a87ae6730c2991fc9521f6d98ed616a15bb4f59813dc9a4478d45"
+    },
+    {
+      "id": "dusk-scout",
+      "path": "./public/assets/cards/dusk-scout.webp",
+      "bytes": 127858,
+      "sha256": "2dcc4313724cf2fc4d205e9528a98e0d31e1b0d9f42c89ed01749c42c6d298d7"
+    },
+    {
+      "id": "stonebound-golem",
+      "path": "./public/assets/cards/stonebound-golem.webp",
+      "bytes": 204770,
+      "sha256": "7c6e7ca1d553a055f7092a3993e3c68583d13a475e63fc54ec1791336aa4ae85"
+    },
+    {
+      "id": "arcane-apprentice",
+      "path": "./public/assets/cards/arcane-apprentice.webp",
+      "bytes": 177596,
+      "sha256": "d2dbb4dd46465178e6c512b7edb286773c29f4a1b2e53f4eed4c01cf932fc36a"
+    },
+    {
+      "id": "flame-lynx",
+      "path": "./public/assets/cards/flame-lynx.webp",
+      "bytes": 177824,
+      "sha256": "f88e09d42c59f225c81e3a27789d2db385bbfbd8a3f81357d754e49ad6e09bf6"
+    },
+    {
+      "id": "glade-stag",
+      "path": "./public/assets/cards/glade-stag.webp",
+      "bytes": 212476,
+      "sha256": "4b667c76aa7fa54e4c7d546b85312b32fb992a63e3d5b2e4175fb5b0554d965f"
+    },
+    {
+      "id": "dune-ranger",
+      "path": "./public/assets/cards/dune-ranger.webp",
+      "bytes": 167480,
+      "sha256": "f332521b374b32cdcfba02ae81a623836f7e80a6d95dbf21c601644a2d53bce0"
+    },
+    {
+      "id": "mist-sprite",
+      "path": "./public/assets/cards/mist-sprite.webp",
+      "bytes": 179058,
+      "sha256": "153a481e9fd4b4737628cc3b99b4f61c19cc6305f3f1f0cf4275aa80b80a937a"
+    },
+    {
+      "id": "ironjack",
+      "path": "./public/assets/cards/ironjack.webp",
+      "bytes": 174974,
+      "sha256": "93b456d938341a3c2c4c8dc7315969e397fe6a538ea23ca5abc57a5c77ab3756"
+    },
+    {
+      "id": "frostcap",
+      "path": "./public/assets/cards/frostcap.webp",
+      "bytes": 183784,
+      "sha256": "476de76b0c4c0aa4aa283c237fcc5209a14b0bfae67c627bdc93ccbb2e71ffdd"
+    },
+    {
+      "id": "thorn-hound",
+      "path": "./public/assets/cards/thorn-hound.webp",
+      "bytes": 187176,
+      "sha256": "7c43752468b831e3ca93d6f7344f0b769076c023bdd7b37979539bc1ba0b4221"
+    },
+    {
+      "id": "sunscale",
+      "path": "./public/assets/cards/sunscale.webp",
+      "bytes": 186378,
+      "sha256": "633e3134543a51cca0b61e1baa0ad483331388745de5160f3220acd41afc1b51"
+    },
+    {
+      "id": "opal-wisp",
+      "path": "./public/assets/cards/opal-wisp.webp",
+      "bytes": 105046,
+      "sha256": "46ec2f1db7260726985f56271eca1f3f989b3e844f54afcc46bd9f0ab0999721"
+    },
+    {
+      "id": "blade-dancer",
+      "path": "./public/assets/cards/blade-dancer.webp",
+      "bytes": 156316,
+      "sha256": "bbdb73e24c18bf8efa9c4866d9750dadf297cc8ac2fff7e812f1ab401e4c878d"
+    },
+    {
+      "id": "rune-medic",
+      "path": "./public/assets/cards/rune-medic.webp",
+      "bytes": 187386,
+      "sha256": "06597ee11ac25f79de21dd3f128abf552a98f3a01609c781738b3055e14cbf1f"
+    },
+    {
+      "id": "river-serpent",
+      "path": "./public/assets/cards/river-serpent.webp",
+      "bytes": 225994,
+      "sha256": "1ce9b1a0799be8f8d5f31829abe235dae89f3db9efcf01d649ad59e971bb19cc"
+    },
+    {
+      "id": "moon-archer",
+      "path": "./public/assets/cards/moon-archer.webp",
+      "bytes": 155644,
+      "sha256": "8878fcc2999e5413687ade066b04ee2d4044ba556a74974068e227e2945b3dce"
+    },
+    {
+      "id": "ashen-knight",
+      "path": "./public/assets/cards/ashen-knight.webp",
+      "bytes": 173440,
+      "sha256": "8f18b715a4b0cc36aabd843a0583a5d9abcbf85d799510886a8617c589702b60"
+    },
+    {
+      "id": "root-giant",
+      "path": "./public/assets/cards/root-giant.webp",
+      "bytes": 206916,
+      "sha256": "379e4e5aa42f26b8ed9b158d7249c9bf586841adf509da2b8107ec3e7be75455"
+    },
+    {
+      "id": "glass-mage",
+      "path": "./public/assets/cards/glass-mage.webp",
+      "bytes": 179040,
+      "sha256": "f742e2c4e0d8ef652517b0fdbb87c74a9437e597dfc4486af1c5c3a64bd270af"
+    },
+    {
+      "id": "thunder-kestrel",
+      "path": "./public/assets/cards/thunder-kestrel.webp",
+      "bytes": 170994,
+      "sha256": "9bade2802e72702eb86d6a771e146fee8ece597aaaa846d8167080e288c85734"
+    },
+    {
+      "id": "nightblade",
+      "path": "./public/assets/cards/nightblade.webp",
+      "bytes": 127688,
+      "sha256": "2dfa86677da2b573fb93bdf310c35a725f3b58eb8b53d9bf92d90e5737e92e31"
+    },
+    {
+      "id": "verdant-templar",
+      "path": "./public/assets/cards/verdant-templar.webp",
+      "bytes": 218272,
+      "sha256": "c206579a35e9a57bce1e45593b6ad661dd17c1f58c19611ed6c3fe23656286da"
+    },
+    {
+      "id": "emberlord",
+      "path": "./public/assets/cards/emberlord.webp",
+      "bytes": 207828,
+      "sha256": "039231971fe84a32c2c49a24d7ce058f47f7c8b88fa7ecdb72a40bf85a35ee02"
+    },
+    {
+      "id": "abyss-whale",
+      "path": "./public/assets/cards/abyss-whale.webp",
+      "bytes": 175378,
+      "sha256": "9efaf76acfbb1163fc192f469f985f4578f9670b720f0a25da9e66bd8c3cd730"
+    },
+    {
+      "id": "skybreaker",
+      "path": "./public/assets/cards/skybreaker.webp",
+      "bytes": 207986,
+      "sha256": "bfe6fe6d88ab397e2dba3c52f52b56084609de30bdfadc079adbe8c1a54b9395"
+    },
+    {
+      "id": "relic-sentinel",
+      "path": "./public/assets/cards/relic-sentinel.webp",
+      "bytes": 213976,
+      "sha256": "8116db2bb0843f53f62b9c5ead3916b16618a2ef2a0f6e7f0494c177f53ae788"
+    },
+    {
+      "id": "starweaver",
+      "path": "./public/assets/cards/starweaver.webp",
+      "bytes": 225304,
+      "sha256": "43ae81c893f5292bedaf59b40a7c8bada63250b6eb2a3de582537cb1372630e0"
+    },
+    {
+      "id": "relic-fusion",
+      "path": "./public/assets/cards/relic-fusion.webp",
+      "bytes": 188892,
+      "sha256": "6624a8c5877a21f6ea3ab121eb9b593cb372d7372d5cae2bf53d4190c7dff49e"
+    },
+    {
+      "id": "mending-light",
+      "path": "./public/assets/cards/mending-light.webp",
+      "bytes": 171958,
+      "sha256": "61928c9212892c0695cc384a2cfb8150fb9a17d6086a84026232ddb6e1bd5e12"
+    },
+    {
+      "id": "spark-bolt",
+      "path": "./public/assets/cards/spark-bolt.webp",
+      "bytes": 167540,
+      "sha256": "f5b6394dffb28f09d5c41c67e0759d2ca99f048db8e0efd079ed4137a88613cc"
+    },
+    {
+      "id": "runic-blade",
+      "path": "./public/assets/cards/runic-blade.webp",
+      "bytes": 133142,
+      "sha256": "01a8ee0970ee3740ad26e1a094425322fc6fbfe3d5717ae3c0de160daa11e876"
+    },
+    {
+      "id": "arcane-insight",
+      "path": "./public/assets/cards/arcane-insight.webp",
+      "bytes": 165732,
+      "sha256": "ac077d22fd155296a768ce9247116f339651152c033d83127038028633f06579"
+    },
+    {
+      "id": "quiet-rain",
+      "path": "./public/assets/cards/quiet-rain.webp",
+      "bytes": 197302,
+      "sha256": "8fe7c9070c3f0a42b1c1604900402d31094b8b467e368d50e34ea9ad09dc12cc"
+    },
+    {
+      "id": "ancient-map",
+      "path": "./public/assets/cards/ancient-map.webp",
+      "bytes": 199576,
+      "sha256": "cdc789e44fba304ee1984b982ff11dd259c370077815e1c4ba7f3829def73d2e"
+    },
+    {
+      "id": "shatterspell",
+      "path": "./public/assets/cards/shatterspell.webp",
+      "bytes": 197694,
+      "sha256": "396a6e2d735f7fc891b9a8e6759ae5dd1049820f32f9ee836759d2e960e6a775"
+    },
+    {
+      "id": "returning-echo",
+      "path": "./public/assets/cards/returning-echo.webp",
+      "bytes": 160020,
+      "sha256": "5a543ca79c780cc72bd33329152763f4a465fe2d51fecfa6d8f839b88ff08453"
+    },
+    {
+      "id": "flame-pulse",
+      "path": "./public/assets/cards/flame-pulse.webp",
+      "bytes": 166502,
+      "sha256": "45202751c379f4727354fa85804a7b9a8505b0c080f15a56fe3a684fbb060ef1"
+    },
+    {
+      "id": "solar-aegis",
+      "path": "./public/assets/cards/solar-aegis.webp",
+      "bytes": 227568,
+      "sha256": "f87d14fda70d0656279d63b49cc5fad4c49fb65ac7b85a3b9082ea0a91bc3ae6"
+    },
+    {
+      "id": "fog-screen",
+      "path": "./public/assets/cards/fog-screen.webp",
+      "bytes": 129406,
+      "sha256": "90dae3bc43370f9f5cc950bce115f0da5a506935212fe8c7d3dfb94218e40d52"
+    },
+    {
+      "id": "ambush-snare",
+      "path": "./public/assets/cards/ambush-snare.webp",
+      "bytes": 185666,
+      "sha256": "4c653a9819520e0766ff30ad1dc79c02a86bd8d0b56d14b3391dabc5eadb68d9"
+    },
+    {
+      "id": "final-stand",
+      "path": "./public/assets/cards/final-stand.webp",
+      "bytes": 198686,
+      "sha256": "b8814aee51e9f90fb89cb0adc7b2569f661c3350d75c5050d50d3719529bd421"
+    },
+    {
+      "id": "ember-rebuke",
+      "path": "./public/assets/cards/ember-rebuke.webp",
+      "bytes": 182186,
+      "sha256": "ca3f89e04ea8a26533d5ae225a21eab4788bb629429560eda80bdd5bc8b56803"
+    },
+    {
+      "id": "guardian-bond",
+      "path": "./public/assets/cards/guardian-bond.webp",
+      "bytes": 185832,
+      "sha256": "075a8827412d6b4630a4493d1ad2b5d21575223569ddb13bea2754a4b9b009a2"
+    },
+    {
+      "id": "nightfall-veil",
+      "path": "./public/assets/cards/nightfall-veil.webp",
+      "bytes": 164214,
+      "sha256": "80a587b5aefa87f86df396046a84349a5fd73b5e8c2f891936956e93edefb7c3"
+    },
+    {
+      "id": "rune-collapse",
+      "path": "./public/assets/cards/rune-collapse.webp",
+      "bytes": 194440,
+      "sha256": "303e01d11362404a8e0c9523c5f82ba3670ccf7e8abe9a31ad1e1c48909fbf51"
+    },
+    {
+      "id": "emberstone-colossus",
+      "path": "./public/assets/cards/emberstone-colossus.webp",
+      "bytes": 194852,
+      "sha256": "535d78dc60b3cd19ac8340cf4632394210606284d03726ab74e460b493045c33"
+    },
+    {
+      "id": "verdant-leviathan",
+      "path": "./public/assets/cards/verdant-leviathan.webp",
+      "bytes": 244414,
+      "sha256": "a2c9567968234e3d314188249f8a77e827446f89332a32fb65bfaf931def9b3d"
+    },
+    {
+      "id": "sunfire-predator",
+      "path": "./public/assets/cards/sunfire-predator.webp",
+      "bytes": 228890,
+      "sha256": "d654a239efe25070d0393f8f3dffc3a68615112c3a9f542f938799fbbd321be0"
+    },
+    {
+      "id": "lunar-knight",
+      "path": "./public/assets/cards/lunar-knight.webp",
+      "bytes": 170738,
+      "sha256": "6e19f36dd4a2cc853636a89ae33a94606b64dc8134fdbd9a76a4cbdeb97320ec"
+    },
+    {
+      "id": "warden-of-roots",
+      "path": "./public/assets/cards/warden-of-roots.webp",
+      "bytes": 227972,
+      "sha256": "36d1a486b1e27a9e168675484dc75c358e3c841590dc833a3706f0fa6bc6a4d3"
+    }
+  ]
+}

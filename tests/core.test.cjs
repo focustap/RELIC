@@ -5,7 +5,7 @@ const path=require("node:path");
 const vm=require("node:vm");
 const root=path.resolve(__dirname,"..");
 const read=name=>fs.readFileSync(path.join(root,name),"utf8");
-const source=read("cards.js")+"\n"+read("starters.js");
+const source=read("effects.js")+"\n"+read("storage.js")+"\n"+read("engine.js")+"\n"+read("cards.js")+"\n"+read("starters.js");
 const catalog=vm.runInNewContext(source+"\n({RELIC_CARDS,RELIC_BY_ID,STARTER_LIST,STARTER_DECK,STARTER_EXTRA,RELIC_STARTERS})");
 const {RELIC_CARDS,RELIC_BY_ID,STARTER_DECK,STARTER_EXTRA,RELIC_STARTERS}=catalog;
 const tally=a=>a.reduce((m,x)=>(m[x]=(m[x]||0)+1,m),{});
@@ -56,11 +56,11 @@ test("Five commander-themed decks have 40 cards, legal copies and a commander in
 });
 test("Shop and game rewards use earned Gold, not mana",()=>{
  const app=read("app.js");
- assert.match(app,/w==="you"\?10:2/);
+ assert.match(app,/const earned=10/);
  assert.match(app,/openPack\(5,10\)/);
  assert.match(app,/12 CARDS — 22 GOLD/);
  assert.match(app,/25 CARDS — 40 GOLD/);
- assert.match(app,/lp:8000/);
+ assert.match(read("engine.js"),/lp:8000/);
 });
 test("Branded card back exists and is shown on hidden cards",()=>{
  assert.match(read("relic-card-back.svg"),/>RELIC<\/text>/);
@@ -85,13 +85,13 @@ test("Every browser script parses",()=>{
 function mockElement(id){
  const e={id,innerHTML:"",textContent:"",style:{},value:id.includes("filter")?"all":"",checked:id==="collection-owned",dataset:{},className:"",
   classList:{add(){},remove(){},toggle(){}},append(){},appendChild(){},after(){},before(){},remove(){},
-  addEventListener(){},closest(){return mockElement("parent")},querySelector(){return mockElement("child")},querySelectorAll(){return []}};
+  addEventListener(){},setAttribute(){},closest(){return mockElement("parent")},querySelector(){return mockElement("child")},querySelectorAll(){return []}};
  return e;
 }
 function runApp(){
  const listeners={};
  const dom=new Map(),document={
-  getElementById(id){if(!dom.has(id))dom.set(id,mockElement(id));return dom.get(id);},
+  documentElement:{dataset:{}},getElementById(id){if(!dom.has(id))dom.set(id,mockElement(id));return dom.get(id);},
   querySelector(){return mockElement("arena")},querySelectorAll(){return []},
   createElement(tag){return mockElement(tag)},addEventListener(type,callback){listeners[type]=callback}};
  const cache={};
@@ -105,7 +105,7 @@ function runApp(){
  app.__location=context.location;
  return app;
 }
-test("Browser smoke: Duel Arena navigation is clickable",()=>{
+test("DOM integration: Duel Arena navigation is clickable",()=>{
  const app=runApp();
  const target={closest(selector){
   if(selector!=="[data-page]")throw new Error("Unexpected selector: "+selector);
@@ -114,7 +114,7 @@ test("Browser smoke: Duel Arena navigation is clickable",()=>{
  assert.doesNotThrow(()=>app.__click({target}));
  assert.equal(app.__location.hash,"duel");
 });
-test("Browser smoke: starting deck selector and solo opening state",()=>{
+test("DOM integration: starting deck selector and solo opening state",()=>{
  const app=runApp();
  assert.equal(app.valid(),true);
  app.chooseStarter("night");
@@ -126,29 +126,29 @@ test("Browser smoke: starting deck selector and solo opening state",()=>{
  assert.equal(app.game().you.hand.length,5);
  assert.equal(app.game().ai.hand.length,5);
 });
-test("Browser smoke: first turn skips battle and AI draws",()=>{
+test("DOM integration: first turn skips battle and AI draws",()=>{
  const app=runApp();app.begin();app.phaseNext();
  assert.equal(app.game().phase,"main2");
  app.turnEnd();assert.equal(app.game().ai.hand.length,6);
  app.aiTurn();assert.equal(app.game().turn,"you");
  assert.equal(app.game().round,2);
 });
-test("Browser smoke: basic booster costs 10 Gold",()=>{
+test("DOM integration: basic booster costs 10 Gold",()=>{
  const app=runApp(),before=app.save().gold;app.openPack(5,10);
  assert.equal(app.save().gold,before-10);
  const total=Object.values(app.save().owned).reduce((a,n)=>a+Number(n),0);
  assert.ok(total>40);
 });
-test("Browser smoke: direct damage and monster battle update Life Points",()=>{
+test("DOM integration: direct damage and monster battle update Life Points",()=>{
  const app=runApp();app.begin();
- const duel=app.game();duel.turn="you";duel.phase="battle";duel.round=2;
+ const duel=app.game();duel.turn="you";duel.phase="battle";duel.round=2;duel.turnNumber=3;
  duel.you.monsters[0]={id:"ember-squire",pos:"attack",atkBonus:0,attacked:false};
  duel.ai.monsters[0]={id:"dusk-scout",pos:"attack",atkBonus:0,attacked:false};
  app.attack("you",0,0);
  assert.equal(duel.ai.lp,7700);
  assert.equal(duel.ai.monsters[0],null);
 });
-test("Browser smoke: named-material Fusion consumes components and places fusion",()=>{
+test("DOM integration: named-material Fusion consumes components and places fusion",()=>{
  const app=runApp();app.begin();const duel=app.game();
  duel.you.hand=["relic-fusion","ember-squire","stonebound-golem"];
  duel.you.extra=["emberstone-colossus"];
@@ -161,5 +161,5 @@ test("Browser smoke: named-material Fusion consumes components and places fusion
 
 test.todo("500+ fully designed original card roster with playtest data");
 test.todo("Player-controlled Chains, full timing windows, Spell Speeds and priority");
-test.todo("Illustrated card fronts verified in a real browser");
+test("Every card has an individual image file and typed identity",()=>{for(const c of RELIC_CARDS){assert.ok(fs.existsSync(path.join(root,c.artwork)),c.id);assert.ok(c.category);if(c.level)assert.ok(c.creatureType);}});
 test.todo("Authoritative online 1v1 and in-game Gold wagers");
