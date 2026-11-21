@@ -22,6 +22,7 @@ Open `http://127.0.0.1:4173/RELIC/`. Node 20+ is required for development tools.
 - Collection search, type/element filters, level/rarity sorting, full illustration inspection, owned-copy validation and up to 30 named saved decks.
 - Existing local saves migrate under the same save key. Saves retain a recovery backup; damaged JSON is preserved; failed writes and conflicting browser tabs are reported. Export/restore is available in Player Profile.
 - Functional profile and settings pages. The online page explicitly reports that online play is unavailable.
+- A full-screen Overgrown Sanctum arena with an original generated stone-and-forest environment, engraved field tiles, corner HP panels, fanned hand, grave/extra-deck inspection and a phase dial. Draw, Standby and End advance automatically; empty action phases are skipped. The AI performs one visible action at a time. Main/Battle phases wait while the player still has legal decisions; choose Battle, Finish Battle or End turn to decline optional remaining actions. Opening an inspection dialog or leaving the arena pauses progression.
 
 ## Rules and economy
 
@@ -49,15 +50,17 @@ npm run test:browser
 npm run review:art
 ```
 
-`npm test` covers rules, every existing spell/trap family, storage recovery/conflicts, deck validation and 100 seeded complete matches across all 25 starter pairings. Three explicit TODOs represent unfinished expansion, full chains and multiplayer.
+`npm test` covers rules, every existing spell/trap family, storage recovery/conflicts, deck validation, automatic phase sequencing and 125 complete simulations across all 25 starter pairings (100 batch-mode seeds plus 25 staged-turn matches). Three explicit TODOs represent unfinished expansion, full chains and multiplayer.
 
-Playwright uses Chromium at desktop (1440×1000) and phone (390×844) sizes. It checks all routes, named deck persistence, purchases, individual reveals, all 53 decoded illustrations, settings, and complete Ember/Nightfall matches driven through actual interface actions. These are browser viewport checks, not physical-device or Safari/Firefox certification. Screenshots and review sheets are written to `test-results/`.
+Playwright uses Chromium at desktop (1440×1000) and phone (390×844) sizes. It checks all routes, named deck persistence, purchases, individual reveals, all 53 decoded illustrations, settings, automatic phases, inspection/menu pausing, restart safety and complete Ember/Nightfall matches driven through actual interface actions. These are browser viewport checks, not physical-device or Safari/Firefox certification. Screenshots and review sheets are written to `test-results/`.
 
 `build` validates JavaScript, checks that every artwork file is a distinct 768×768 WebP, writes its hash to `artwork/manifest.json`, and assembles the static `dist/` directory. Artwork totals approximately 9.33 MiB. Production uses lazy-loaded WebP images; no credentials or image service connection is needed to play.
 
 ## Artwork provenance
 
 The built-in `image_gen` tool generated one original illustration per card. Exact prompts are recorded in [artwork/prompts.json](artwork/prompts.json); files are stored under `public/assets/cards/<stable-card-id>.webp`. Original generation outputs were retained outside the repository; optimized game images are committed. No frame, name, statistics, stars or game UI are baked into the card artwork. Contact sheets were visually reviewed for matching subjects and unwanted text or borders.
+
+The new environment is stored as `public/assets/arena/overgrown-sanctum.webp` (1920×1080, approximately 581 KiB); its exact generation prompt is in [artwork/arena-prompt.json](artwork/arena-prompt.json). It contains scenery only. Engraved zones, cards, text, HP panels and all controls are rendered separately in HTML/CSS/SVG. The supplied reference was used for layout and atmosphere, without copying its game assets or branding.
 
 ## GitHub Pages
 

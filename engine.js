@@ -41,7 +41,7 @@ function createEngine(cards, options = {}) {
  }
  function create(deck,extra,aiDeck=deck,aiExtra=extra) {
   if(!validateDeck(deck,extra)||!validateDeck(aiDeck,aiExtra))throw new Error("A legal 40–60 card deck is required.");
-  const g={you:side(deck,extra),ai:side(aiDeck,aiExtra),turn:"you",phase:"main1",round:1,turnNumber:1,winner:null,logs:[],events:[]};
+  const g={you:side(deck,extra),ai:side(aiDeck,aiExtra),turn:"you",phase:options.stagedTurns?'draw':'main1',round:1,turnNumber:1,winner:null,logs:[],events:[]};
   draw(g,"you",5);draw(g,"ai",5);
   log(g,"Both duelists begin with 8,000 HP and five cards.");
   log(g,"You go first. No first-turn draw or battle.");g.events=[];return g;
@@ -178,14 +178,18 @@ function createEngine(cards, options = {}) {
   }
   return true;
  }
- function endTurn(g,s) {
-  if(!active(g,s))return false;
+ function completeTurn(g,s) {
   for(const p of [g.you,g.ai])for(const m of p.monsters)if(m)m.atkBonus=0;
   log(g,(s==="you"?"Your":"Warden's")+" turn ends.");
-  g.turn=other(s);g.turnNumber++;g.round=Math.floor((g.turnNumber+1)/2);g.phase="main1";
+  g.turn=other(s);g.turnNumber++;g.round=Math.floor((g.turnNumber+1)/2);g.phase=options.stagedTurns?'draw':'main1';
   const p=g[g.turn];p.normalUsed=false;
   for(const m of p.monsters)if(m){m.attacked=false;m.moved=false;}
-  draw(g,g.turn);return true;
+  if(!options.stagedTurns)draw(g,g.turn);return true;
+ }
+ function endTurn(g,s) {
+  if(!active(g,s)||!['main1','battle','main2'].includes(g.phase))return false;
+  if(options.stagedTurns){g.phase='end';log(g,'End Phase begins.');return true;}
+  return completeTurn(g,s);
  }
  function nextPhase(g,s) {
   if(!active(g,s))return false;
@@ -195,59 +199,97 @@ function createEngine(cards, options = {}) {
   else return false;
   log(g,g.phase==="battle"?"Battle Phase begins.":"Main Phase 2 begins.");return true;
  }
- function aiTurn(g,s="ai") {
+ function canPosition(g,s,i) {
+  const m=g[s].monsters[i];return !!m&&m.played!==g.turnNumber&&!m.moved&&!m.attacked;
+ }
+ function mainActions(g,s) {
   if(!allowed(g,s))return false;
+  const p=g[s];
+  return p.hand.some((id,i)=>canNormal(g,s,id)||canCast(g,s,'hand',i)||(['spell','trap'].includes(card(id).type)&&slot(p.spells)>=0))||
+   p.spells.some((m,i)=>m&&canCast(g,s,'set',i))||p.monsters.some((m,i)=>m&&canPosition(g,s,i));
+ }
+ function attackers(g,s) {
+  if(!active(g,s)||g.turnNumber===1)return [];
+  return g[s].monsters.map((m,i)=>({m,i})).filter(x=>x.m?.pos==='attack'&&!x.m.attacked);
+ }
+ function shouldAdvance(g) {
+  if(!g||g.winner)return false;
+  if(['draw','standby','end'].includes(g.phase)||g.turn==='ai')return true;
+  if(main(g))return !mainActions(g,g.turn);
+  return g.phase==='battle'&&attackers(g,g.turn).length===0;
+ }
+ function advanceAutomatic(g,s) {
+  if(!active(g,s))return false;
+  if(g.phase==='end')return completeTurn(g,s);
+  if(g.phase==='draw'){
+   if(g.turnNumber!==1)draw(g,s);
+   if(!g.winner){g.phase='standby';log(g,'Standby Phase begins.');}return true;
+  }
+  if(g.phase==='standby'){g.phase='main1';log(g,'Main Phase 1 begins.');return true;}
+  if(main(g)&&!mainActions(g,s))return nextPhase(g,s);
+  if(g.phase==='battle'&&!attackers(g,s).length)return nextPhase(g,s);
+  return false;
+ }
+ // One real decision per step lets clients show the AI's actions and phases.
+ function aiStep(g,s='ai') {
+  if(!active(g,s))return false;
+  if(['draw','standby','end'].includes(g.phase))return advanceAutomatic(g,s);
   const p=g[s],foe=g[other(s)];
-  // Remove a legal threat before choosing summons. No peeking at face-down cards.
-  for(let i=0;i<p.hand.length;i++)if(card(p.hand[i]).effect==="shatter"&&canCast(g,s,"hand",i)){cast(g,s,"hand",i);i--;}
-  let fi=p.hand.indexOf("relic-fusion");
-  const fusions=choices(g,s).sort((a,b)=>card(b).atk-card(a).atk);
-  if(fi>=0&&fusions.length)fusion(g,s,"hand",fi,fusions[0]);
+  if(g.phase==='battle'){
+   for(const {m,i} of attackers(g,s).sort((a,b)=>power(b.m)-power(a.m))){
+    const targets=foe.monsters.map((x,k)=>x?{x,k}:null).filter(Boolean);
+    if(!targets.length)return attack(g,s,i,-1);
+    const beatable=targets.filter(({x})=>x.pos!=='set'&&power(m)>(x.pos==='attack'?power(x):card(x.id).def)).sort((a,b)=>power(b.x)-power(a.x));
+    const hidden=targets.find(({x})=>x.pos==='set');
+    if(beatable.length)return attack(g,s,i,beatable[0].k);
+    if(hidden)return attack(g,s,i,hidden.k);
+   }
+   return nextPhase(g,s);
+  }
+  if(!main(g))return false;
+  // Evaluate public threats before summons. Hidden defender stats are never read.
+  for(let i=0;i<p.hand.length;i++)if(card(p.hand[i]).effect==='shatter'&&canCast(g,s,'hand',i))return cast(g,s,'hand',i);
+  const fi=p.hand.indexOf('relic-fusion'),fusions=choices(g,s).sort((a,b)=>card(b).atk-card(a).atk);
+  if(fi>=0&&fusions.length)return fusion(g,s,'hand',fi,fusions[0]);
+  for(let i=0;i<p.spells.length;i++)if(p.spells[i]&&canCast(g,s,'set',i)){
+   if(card(p.spells[i].id).effect==='fusion')return fusion(g,s,'set',i,fusions[0]);
+   return cast(g,s,'set',i);
+  }
   let best=-1,bestValue=-Infinity;
   const existing=p.monsters.filter(Boolean).map(power).sort((a,b)=>a-b);
-  for(let i=0;i<p.hand.length;i++) {
+  for(let i=0;i<p.hand.length;i++){
    const c=card(p.hand[i]);if(!canNormal(g,s,c.id))continue;
    const cost=existing.slice(0,tributes(c.id)).reduce((a,n)=>a+n,0);
-   const value=Math.max(c.atk,c.def*.85)-cost+(c.effect==="draw-on-summon"?450:0);
+   const value=Math.max(c.atk,c.def*.85)-cost+(c.effect==='draw-on-summon'?450:0);
    if(value>bestValue){bestValue=value;best=i;}
   }
-  if(best>=0&&bestValue>0) {
-   const c=card(p.hand[best]),threat=Math.max(0,...foe.monsters.filter(m=>m&&m.pos!=="set").map(power));
-   summon(g,s,best,c.def>c.atk&&threat>c.atk?"set":"attack");
+  if(best>=0&&bestValue>0){
+   const c=card(p.hand[best]),threat=Math.max(0,...foe.monsters.filter(m=>m&&m.pos!=='set').map(power));
+   return summon(g,s,best,c.def>c.atk&&threat>c.atk?'set':'attack');
   }
-  for(let i=0;i<p.hand.length&&!g.winner;) {
+  for(let i=0;i<p.hand.length;i++){
    const c=card(p.hand[i]);
-   if(c.type==="trap"&&setBackrow(g,s,i))continue;
-   if(c.type==="spell"&&canCast(g,s,"hand",i)) {
-    if(c.effect==="fusion"){const opts=choices(g,s);if(fusion(g,s,"hand",i,opts[0]))continue;}
-    else if(cast(g,s,"hand",i))continue;
-   }i++;
+   if(c.type==='trap'&&slot(p.spells)>=0)return setBackrow(g,s,i);
+   if(c.type==='spell'&&c.effect!=='fusion'&&canCast(g,s,'hand',i))return cast(g,s,'hand',i);
   }
-  if(g.winner)return true;
-  // Existing defenders can rejoin combat when the public board is safe.
-  for(let i=0;i<p.monsters.length;i++) {
-   const m=p.monsters[i];if(!m||m.played===g.turnNumber)continue;
-   const threat=Math.max(0,...foe.monsters.filter(x=>x&&x.pos!=="set"&&x.pos==="attack").map(power));
-   if(m.pos!=="attack"&&power(m)>=threat)position(g,s,i,m.pos==="set");
-   else if(m.pos==="attack"&&power(m)<threat&&card(m.id).def>power(m))position(g,s,i);
+  for(let i=0;i<p.monsters.length;i++){
+   const m=p.monsters[i];if(!canPosition(g,s,i))continue;
+   const threat=Math.max(0,...foe.monsters.filter(x=>x&&x.pos==='attack').map(power));
+   if(m.pos!=='attack'&&power(m)>=threat)return position(g,s,i,m.pos==='set');
+   if(m.pos==='attack'&&power(m)<threat&&card(m.id).def>power(m))return position(g,s,i);
   }
-  if(g.turnNumber!==1) {
-   g.phase="battle";
-   const attackers=p.monsters.map((m,i)=>({m,i})).filter(x=>x.m?.pos==="attack").sort((a,b)=>power(b.m)-power(a.m));
-   for(const {m,i} of attackers) {
-    if(g.winner)break;
-    const targets=foe.monsters.map((x,k)=>x?{x,k}:null).filter(Boolean);
-    if(!targets.length){attack(g,s,i,-1);continue;}
-    const beatable=targets.filter(({x})=>x.pos!=="set"&&power(m)>(x.pos==="attack"?power(x):card(x.id).def)).sort((a,b)=>power(b.x)-power(a.x));
-    const hidden=targets.find(({x})=>x.pos==="set");
-    if(beatable.length)attack(g,s,i,beatable[0].k);
-    else if(hidden)attack(g,s,i,hidden.k);
-    // No profitable public target: keep the monster alive.
-   }
-  }
-  if(!g.winner)endTurn(g,s);return true;
+  return nextPhase(g,s);
  }
- return {create,validateDeck,canNormal,canCast,choices,summon,setBackrow,fusion,cast,attack,position,endTurn,nextPhase,aiTurn,finish};
+ function aiTurn(g,s='ai') {
+  if(!active(g,s))return false;
+  // Batch interface for simulations; the browser uses aiStep with cancellable pacing.
+  let steps=0;
+  while(active(g,s)&&steps++<250){if(!aiStep(g,s))return false;}
+  if(steps>=250)throw new Error('AI turn exceeded its action limit.');
+  return true;
+ }
+
+ return {create,validateDeck,canNormal,canCast,choices,summon,setBackrow,fusion,cast,attack,position,endTurn,nextPhase,aiTurn,aiStep,advanceAutomatic,shouldAdvance,mainActions,attackers,finish};
 }
 root.RelicEngine={createEngine};
 if(typeof module!=="undefined"&&module.exports)module.exports=root.RelicEngine;

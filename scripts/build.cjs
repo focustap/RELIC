@@ -8,7 +8,7 @@ const root=path.resolve(__dirname,'..');
 async function build(){
  const read=name=>fs.readFileSync(path.join(root,name),'utf8');
  const cards=vm.runInNewContext(read('cards.js')+';RELIC_CARDS');
- const files=['index.html','styles.css','effects.css','presentation.css','cards.js','starters.js','storage.js','engine.js','effects.js','app.js','relic-card-back.svg'];
+ const files=['index.html','styles.css','effects.css','presentation.css','arena.css','cards.js','starters.js','storage.js','engine.js','effects.js','app.js','relic-card-back.svg'];
  for(const file of files)if(file.endsWith('.js'))new vm.Script(read(file),{filename:file});
  const assets=[];
  for(const c of cards){
@@ -20,6 +20,9 @@ async function build(){
  }
  if(new Set(assets.map(x=>x.sha256)).size!==cards.length)throw Error('Duplicate artwork files');
  for(const match of read('index.html').matchAll(/(?:src|href)="\.\/([^"#]+)"/g))if(!fs.existsSync(path.join(root,match[1])))throw Error('Missing HTML asset '+match[1]);
+ for(const css of files.filter(file=>file.endsWith('.css')))for(const match of read(css).matchAll(/url\(['"]?(\.\/[^'"\)]+)['"]?\)/g))if(!fs.existsSync(path.resolve(root,match[1])))throw Error('Missing CSS asset '+match[1]);
+ const arena=await sharp(path.join(root,'public','assets','arena','overgrown-sanctum.webp')).metadata();
+ if(arena.width!==1920||arena.height!==1080||arena.format!=='webp')throw Error('Invalid arena background');
  const output=path.join(root,'dist');fs.mkdirSync(output,{recursive:true});
  for(const file of files)fs.copyFileSync(path.join(root,file),path.join(output,file));
  fs.cpSync(path.join(root,'public'),path.join(output,'public'),{recursive:true});

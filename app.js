@@ -3,7 +3,7 @@
 "use strict";
 const $=id=>document.getElementById(id);
 const NAMES={home:"DASHBOARD",duel:"DUEL ARENA",packs:"CARD SHOP",collection:"COLLECTION",deck:"DECK BUILDER",rules:"HOW TO PLAY",profile:"PLAYER PROFILE",settings:"SETTINGS",online:"ONLINE MULTIPLAYER"};
-const engine=RelicEngine.createEngine(RELIC_BY_ID);
+const engine=RelicEngine.createEngine(RELIC_BY_ID,{stagedTurns:true});
 const K="relic-alpha-save-2";
 const start=()=>({gold:35,owned:Object.assign({},STARTER_LIST,{"emberstone-colossus":1,"verdant-leviathan":1}),deck:STARTER_DECK.slice(),extra:STARTER_EXTRA.slice(),wins:0,losses:0,daily:"",starter:"classic",decks:[{id:"classic",name:"Warden's Challenger",deck:STARTER_DECK.slice(),extra:STARTER_EXTRA.slice()}],activeDeck:"classic",deckName:"Warden's Challenger",settings:{motion:"system",performance:"high"}});
 const store=RelicStorage.createStore(localStorage,K,start,RELIC_BY_ID);
@@ -31,8 +31,8 @@ function cardHTML(c,n){
 }
 let modalReturn=null;
 function showCard(c){if(!c)return;modalReturn=document.activeElement;$("modal-content").innerHTML='<div class="modal-card-layout">'+cardHTML(c)+'<div><div class="eyebrow">'+label(c)+' • '+c.type.toUpperCase()+'</div><h2>'+c.name+'</h2><div class="modal-detail">'+(c.level?"LEVEL "+c.level+" • ":"")+c.element+'</div><p>'+c.description+'</p>'+(c.materials?'<p><b>Exact Fusion materials:</b> '+c.materials.map(x=>card(x).name).join(" + ")+'</p>':"")+'<p>Owned: <b>'+count(c.id)+'</b></p><a class="art-download" href="'+c.artwork+'" target="_blank" rel="noopener">VIEW FULL ILLUSTRATION ↗</a></div></div>';$("card-modal").classList.remove("hidden");$("card-modal").querySelector('.modal-close').focus?.();}
-function closeModal(id){$(id).classList.add('hidden');modalReturn?.focus?.();}
-function route(q){page=NAMES[q]?q:"home";document.querySelectorAll(".page").forEach(e=>e.classList.toggle("active",e.id==="page-"+page));document.querySelectorAll(".nav-link").forEach(e=>e.classList.toggle("active",e.dataset.page===page));$("page-crumb").textContent=NAMES[page];location.hash=page;window.scrollTo(0,0);render();}
+function closeModal(id){$(id).classList.add('hidden');modalReturn?.focus?.();scheduleFlow();}
+function route(q){cancelFlow();page=NAMES[q]?q:"home";document.querySelectorAll(".page").forEach(e=>e.classList.toggle("active",e.id==="page-"+page));document.querySelectorAll(".nav-link").forEach(e=>e.classList.toggle("active",e.dataset.page===page));$("page-crumb").textContent=NAMES[page];location.hash=page;document.body?.classList.toggle("in-duel",page==="duel"&&!!game);window.scrollTo(0,0);render();}
 function render(){
  $("featured-relic").innerHTML=cardHTML(card("ember-squire"));
  $("arena-deck").textContent="ACTIVE DECK: "+save.deckName;
@@ -151,33 +151,50 @@ function cast(s,where,i){
  return perform('cast',s,where,i);
 }
 function attack(s,from,to){return perform('attack',s,from,to);}
-function scheduleAI(){
- if(game&&!game.winner&&game.turn==='ai'){
-  const pending=game;setTimeout(()=>{if(game===pending)aiTurn();},650);
- }
+let flowTimer=null,flowEpoch=0,lastPhaseKey='',announcementTimer=null;
+const PHASE_LABELS={draw:'DRAW',standby:'STANDBY',main1:'MAIN PHASE 1',battle:'BATTLE',main2:'MAIN PHASE 2',end:'END PHASE',over:'DUEL FINISHED'};
+function cancelFlow(){clearTimeout(flowTimer);flowTimer=null;flowEpoch++;}
+function flowBlocked(){return page!=='duel'||!!document.querySelector('.modal:not(.hidden)')||selected?.kind==='fusion'||attackSource!==-1;}
+function scheduleFlow(){
+ cancelFlow();if(!game||game.winner||flowBlocked()||!engine.shouldAdvance(game))return;
+ const current=game,epoch=flowEpoch,phase=game.phase,turn=game.turnNumber;
+ const delay=game.turn==='ai'&&!['draw','standby','end'].includes(phase)?360:460;
+ flowTimer=setTimeout(()=>{flowTimer=null;if(game!==current||flowEpoch!==epoch||game.phase!==phase||game.turnNumber!==turn)return;advanceFlow();},delay);
 }
-function phaseNext(){if(perform('nextPhase','you'))scheduleAI();}
-function turnEnd(){if(perform('endTurn','you'))scheduleAI();}
-function aiTurn(){if(game&&game.turn==='ai')perform('aiTurn','ai');}
+function advanceFlow(){
+ if(!game||game.winner||flowBlocked())return false;
+ const result=game.turn==='ai'?engine.aiStep(game,'ai'):engine.advanceAutomatic(game,'you');
+ if(result){selected=null;attackSource=-1;settle();showDuel();}return result;
+}
+function phaseNext(){return perform('nextPhase','you');}
+function turnEnd(){return perform('endTurn','you');}
+function aiTurn(){if(game&&game.turn==='ai')return perform('aiTurn','ai');}
 function begin(){
  if(!valid()){route('deck');return toast('A legal 40–60 card deck is required.');}
  if(game&&!game.winner&&!confirm('Abandon the current duel?'))return;
+ cancelFlow();lastPhaseKey="";clearTimeout(announcementTimer);
  const opponent=RELIC_STARTERS[Math.floor(Math.random()*RELIC_STARTERS.length)];
  game=engine.create(save.deck,save.extra,opponent.deck,opponent.extra);
- selected=null;attackSource=-1;showDuel();
+ selected=null;attackSource=-1;if(page!=="duel")route("duel");else showDuel();
 }
 function miniZone(m,s,i){
- if(!m)return '<div class="zone" role="button" tabindex="0" aria-label="'+s+' monster zone '+(i+1)+'" data-zone="'+s+'-'+i+'"></div>';
- if(m.pos==="set")return '<div class="zone filled" data-zone="'+s+'-'+i+'"><div class="set-card defense" aria-label="Face-down RELIC card"><span>RELIC</span></div></div>';
- return '<div data-battle-position="'+m.pos+'" data-atk="'+(card(m.id).atk+m.atkBonus)+'" data-def="'+card(m.id).def+'" class="zone filled '+(m.pos==="defense"?"is-defense ":"")+ (attackSource===i&&s==="you"?"selected-target":"")+'" data-zone="'+s+'-'+i+'">'+cardHTML({...card(m.id),atk:card(m.id).atk+m.atkBonus})+'</div>';
+ const accessible=' role="button" tabindex="0" aria-label="'+(s==='you'?'Your':'Opponent')+' monster zone '+(i+1)+'" data-zone="'+s+'-'+i+'"';
+ if(!m)return '<div class="zone"'+accessible+'></div>';
+ if(m.pos==='set')return '<div class="zone filled is-defense"'+accessible+'><div class="set-card defense" aria-label="Face-down RELIC card"><span>RELIC</span></div></div>';
+ return '<div data-battle-position="'+m.pos+'" data-atk="'+(card(m.id).atk+m.atkBonus)+'" data-def="'+card(m.id).def+'" class="zone filled '+(m.pos==='defense'?'is-defense ':'')+(attackSource===i&&s==='you'?'selected-target':'')+'"'+accessible+'>'+cardHTML({...card(m.id),atk:card(m.id).atk+m.atkBonus})+'<span class="field-card-stats"><b>'+(card(m.id).atk+m.atkBonus)+'/'+card(m.id).def+'</b><small>'+card(m.id).level+'</small></span></div>';
 }
 function backrowZone(m,s,i){
- if(!m)return '<div class="zone" data-backrow="'+s+'-'+i+'"></div>';
- if(m)return '<div class="zone filled" data-backrow="'+s+'-'+i+'"><div class="set-card" aria-label="Face-down RELIC card"><span>RELIC</span></div></div>';
- return '<div class="zone filled" data-backrow="'+s+'-'+i+'">'+cardHTML(card(m.id))+'</div>';
+ const accessible=' role="button" tabindex="0" aria-label="'+(s==='you'?'Your':'Opponent')+' spell and trap zone '+(i+1)+'" data-backrow="'+s+'-'+i+'"';
+ return '<div class="zone '+(m?'filled':'')+'"'+accessible+'>'+(m?'<div class="set-card" aria-label="Face-down RELIC card"><span>RELIC</span></div>':'')+'</div>';
+}
+function showPile(s,pile){
+ if(!game||!['you','ai'].includes(s)||!['grave','extra'].includes(pile)||(s==='ai'&&pile==='extra'))return;
+ modalReturn=document.activeElement;
+ const ids=game[s][pile];$('modal-content').innerHTML='<h2 class="pile-heading">'+(s==='you'?'Your':'Warden’s')+' '+(pile==='grave'?'Graveyard':'Extra Deck')+'</h2><div class="pile-cards">'+(ids.length?ids.map(id=>cardHTML(card(id))).join(''):'<p>No cards here yet.</p>')+'</div>';
+ $('card-modal').classList.remove('hidden');$('card-modal').querySelector('.modal-close').focus?.();cancelFlow();
 }
 function actions(){
- if(!game||game.winner||game.turn!=="you")return game&&game.winner?'<h3>'+(game.winner==="you"?"VICTORY":"DEFEAT")+'</h3><p>Start a new duel to play again.</p>':'<p>Waiting for the Warden...</p>';
+ if(!game||game.winner||game.turn!=="you")return game&&game.winner?'<div class="empty-select">Duel complete.</div>':'<div class="empty-select">Waiting for the Warden...</div>';
  const p=mine("you");
  if(selected&&selected.kind==="fusion"){
   const opts=choices("you");return '<h3 class="selection-title">Choose a Fusion Monster</h3><p>Exact named materials will be sent to the Graveyard.</p><div class="selection-actions">'+opts.map(id=>'<button data-fusion="'+id+'">'+card(id).name+'</button>').join("")+'<button data-cancel>Cancel</button></div>';
@@ -187,10 +204,10 @@ function actions(){
   const c=card(p.hand[selected.i]);if(!c)return "";
   let buttons="";
   const active=["main1","main2"].includes(game.phase);
-  if(active&&c.type==="monster")buttons='<button data-summon="attack">Summon (Attack)</button><button data-summon="set">Set (Defense)</button>';
-  if(active&&c.type==="spell")buttons='<button data-cast="hand">Activate Spell</button>';
-  if(active&&["spell","trap"].includes(c.type))buttons+='<button data-set-card>Set Face-down</button>';
-  return '<div class="selection-title">'+c.name+'</div><p>'+c.description+'</p><div class="selection-actions">'+buttons+'<button data-cancel>Cancel</button></div>';
+  if(active&&c.type==="monster"&&engine.canNormal(game,"you",c.id))buttons='<button data-summon="attack">Summon (Attack)</button><button data-summon="set">Set (Defense)</button>';
+  if(active&&c.type==="spell"&&engine.canCast(game,"you","hand",selected.i))buttons='<button data-cast="hand">Activate Spell</button>';
+  if(active&&["spell","trap"].includes(c.type)&&mine("you").spells.some(x=>!x))buttons+='<button data-set-card>Set Face-down</button>';
+  return '<div class="selection-title">'+c.name+'</div><p>'+c.description+'</p><div class="selection-actions">'+buttons+'<button data-inspect="'+c.id+'">Inspect</button><button data-cancel>Cancel</button></div>';
  }
  if(selected.kind==="spell"){
   const sp=p.spells[selected.i],c=sp&&card(sp.id);
@@ -210,29 +227,42 @@ function actions(){
  return '<div class="empty-select">Select a card.</div>';
 }
 function showDuel(){
+ document.body?.classList.toggle("in-duel",page==="duel"&&!!game);
  $("duel-result").classList.toggle("hidden",!game?.winner);
- if(game?.winner){$("duel-result").className="result-banner "+(game.winner==='you'?'victory':'defeat');$("duel-result").innerHTML='<h2>'+(game.winner==='you'?'VICTORY':'DEFEAT')+'</h2><p>'+ (game.rewarded?'10 Gold earned · Your collection awaits.':'Reward not saved. Export your save and reload to resolve storage errors.')+'</p>';}
+ if(game?.winner){$("duel-result").className="result-banner "+(game.winner==='you'?'victory':'defeat');$("duel-result").innerHTML='<h2>'+(game.winner==='you'?'VICTORY':'DEFEAT')+'</h2><p>'+ (game.rewarded?'10 Gold earned · Your collection awaits.':'Reward not saved. Export your save and reload to resolve storage errors.')+'</p><div class="result-actions"><button class="btn btn-gold" data-restart-duel>DUEL AGAIN</button><button class="btn btn-outline" data-go="home">RETURN TO SANCTUM</button></div>';}
  $("duel-idle").classList.toggle("hidden",!!game);$("duel-play").classList.toggle("hidden",!game);if(!game)return;
  const a=mine("you"),b=mine("ai");
+ $('duel-play').dataset.phase=game.phase;$('duel-play').dataset.turn=game.turn;$('duel-play').dataset.turnNumber=String(game.turnNumber);
  for(const [id,hp] of [['player-lp',a.lp],['enemy-lp',b.lp]]){
   const el=$(id),next=hp.toLocaleString();if(el.textContent!==next){el.textContent=next;el.parentElement?.classList.add('hp-changed');setTimeout(()=>el.parentElement?.classList.remove('hp-changed'),700);}
  }
  $("duel-turn").textContent=game.winner?"DUEL FINISHED":"TURN "+game.turnNumber+" — "+(game.turn==="you"?"YOUR TURN":"WARDEN'S TURN");
- $("duel-phase").textContent=game.phase.toUpperCase().replace("MAIN1","MAIN PHASE 1").replace("MAIN2","MAIN PHASE 2");
- $("duel-hint").textContent=game.winner?"Duel complete.":"Select a card to play or advance phases.";
+ $("duel-phase").textContent=PHASE_LABELS[game.phase];
+ $("phase-owner").textContent=game.turn==='you'?'YOUR TURN':'WARDEN’S TURN';
+ $("phase-turn-number").textContent='TURN '+game.turnNumber;
+ $("arena-player-deck").textContent=save.deckName;
+ $("player-hp-bar").style.width=Math.min(100,game.you.lp/80)+'%';$('enemy-hp-bar').style.width=Math.min(100,game.ai.lp/80)+'%';
+ const phaseOrder=['draw','standby','main1','battle','main2','end'];document.querySelectorAll('.phase-track [data-phase]').forEach(el=>{el.classList.toggle('current',el.dataset.phase===game.phase);el.classList.toggle('passed',phaseOrder.indexOf(el.dataset.phase)<phaseOrder.indexOf(game.phase));});
+ $('duel-play').dataset.selection=selected?'true':'false';
+ const phaseKey=game.turnNumber+':'+game.phase;
+ if(phaseKey!==lastPhaseKey){lastPhaseKey=phaseKey;const el=$('phase-announcement');el.textContent=PHASE_LABELS[game.phase];el.classList.remove('announce');void el.offsetWidth;el.classList.add('announce');clearTimeout(announcementTimer);announcementTimer=setTimeout(()=>{if(lastPhaseKey===phaseKey)el.textContent='';},1000);}
+ $("duel-hint").textContent=game.winner?'Duel complete.':game.turn==='ai'?'The Warden is making a move…':['draw','standby','end'].includes(game.phase)?'Phases advance automatically.':game.phase==='battle'?'Select a monster to attack. Battle ends when your attacks are used.':'Play your cards. Choose Battle or End turn when you are ready.';
  $("enemy-hand").innerHTML=b.hand.map(()=>'<i title="RELIC card back"></i>').join("");
  for(const s of ["you","ai"]){const obj=mine(s);$(s==="you"?"player-monsters":"enemy-monsters").innerHTML=obj.monsters.map((m,i)=>miniZone(m,s,i)).join("");
  $(s==="you"?"player-spells":"enemy-spells").innerHTML=obj.spells.map((m,i)=>backrowZone(m,s,i)).join("");
  $(s==="you"?"player-grave":"enemy-grave").textContent=obj.grave.length;
  $(s==="you"?"player-field":"enemy-field").textContent=obj.deck.length;
+ $(s==="you"?"player-extra-count":"enemy-extra-count").textContent=obj.extra.length;
  }
- $("player-hand").innerHTML=a.hand.map((id,i)=>'<div role="button" tabindex="0" aria-label="Select '+card(id).name+'" data-hand="'+i+'" class="'+(selected&&selected.kind==="hand"&&selected.i===i?"selected":"")+'">'+cardHTML(card(id))+'</div>').join("");
- $("hand-count").textContent=a.hand.length+" CARDS";
+ $("player-hand").innerHTML=a.hand.map((id,i)=>'<div style="--tilt:'+((i-(a.hand.length-1)/2)*4)+'deg;--lift:'+(Math.abs(i-(a.hand.length-1)/2)*3)+'px;--order:'+i+'" role="button" tabindex="0" aria-label="Select '+card(id).name+'" data-hand="'+i+'" class="'+(selected&&selected.kind==="hand"&&selected.i===i?"selected":"")+'">'+cardHTML(card(id))+'</div>').join("");
+ $("hand-count").textContent=a.hand.length+" CARDS";$("player-hand").dataset.large=a.hand.length>8?"true":"false";
  $("selected-panel").innerHTML=actions();
  RelicEffects.play(game.events.splice(0));
  $("duel-log").innerHTML=game.logs.slice(0,20).map(s=>'<div class="log-item">'+s+'</div>').join("");
- $("advance-phase").disabled=game.turn!=="you"||!!game.winner;
- $("end-turn").disabled=game.turn!=="you"||!!game.winner;
+ const interactive=game.turn==='you'&&!game.winner&&['main1','battle','main2'].includes(game.phase);$('duel-play').dataset.interactive=interactive?'true':'false';
+ $('advance-phase').disabled=!interactive;$('end-turn').disabled=!interactive;
+ $('advance-phase').textContent=game.phase==='main1'?(game.turnNumber===1?'FINISH MAIN →':'BATTLE →'):game.phase==='battle'?'FINISH BATTLE →':game.phase==='main2'?'FINISH TURN →':'AUTOMATIC';
+ scheduleFlow();
 }
 function clickEvent(ev){
  const t=ev.target;
@@ -240,6 +270,8 @@ function clickEvent(ev){
  let x;
  if((x=attr("[data-page]")))return route(x.dataset.page);
  if((x=attr("[data-go]")))return route(x.dataset.go);
+ if(attr("[data-restart-duel]"))return begin();
+ if((x=attr("[data-pile]"))){const [s,pile]=x.dataset.pile.split("-");return showPile(s,pile);}
  if((x=attr("[data-inspect]")))return showCard(card(x.dataset.inspect));
  if((x=attr("[data-reveal-card]"))){x.classList.remove("unrevealed");x.classList.add("revealed");x.setAttribute("aria-label","Revealed card");return;}
  if((x=attr("[data-buy]")))return buy(x.dataset.buy);
@@ -273,6 +305,7 @@ function applySettings(){
  document.documentElement.dataset.performance=save.settings.performance;
 }
 function wire(){
+ $("toggle-duel-log").onclick=()=>{const el=$("duel-history");el.classList.toggle("hidden");$("toggle-duel-log").setAttribute("aria-expanded",String(!el.classList.contains("hidden")));};
  $("import-save").onclick=()=>$("import-save-file").click();
  $("import-save-file").addEventListener('change',async event=>{
   const file=event.target.files?.[0];if(!file)return;

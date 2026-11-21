@@ -39,3 +39,13 @@ Known remaining work, in the original queue's order:
 4. Build and deploy an authoritative backend with accounts, independent inventory/wallet storage, private matches, validated moves, disconnect/reconnect, timeouts and idempotent settlement. Share `engine.js` with the server but send clients only public state. Hosting/secrets are not configured; no online play exists in this branch.
 
 The remote master issue has not been marked complete. No deployment or merge is implied by these local checks.
+
+## Arena and automatic phases — 21 November 2026
+
+User steering: match the spatial composition of the supplied card-game reference and advance turn phases automatically. Preserved the 53-card roster, original illustrations, existing rules/economy and saved decks.
+
+- Replaced the scrolling match dashboard with one full-screen arena: original mossy limestone environment, programmatic stone zones, player/opponent HP panels in opposite corners, fanned hand, side deck/grave/extra piles and a phase dial/phase track. Desktop, phone portrait and phone landscape layouts are supported. Cards and UI are independent of the generated environment bitmap.
+- Added explicit staged Draw/Standby/End, legal-action-aware automatic progression, per-action AI pacing and contextual controls for declining remaining optional actions. The scheduler pauses for inspection/navigation and cancels old callbacks on restart or match completion. It never auto-selects player actions or attacks, and has no timeout that forfeits a player decision.
+- Added regression tests for first-turn skips, exact draw counts, phase order, holding at legal decisions, automatic battle completion, terminal guards, paced AI, pause/resume and restart behavior. Complete Ember/Nightfall browser matches exercise the new turn flow. Existing 500-card/chain/multiplayer TODOs remain pending.
+- The new original environment and its exact built-in image generation prompt are stored in `public/assets/arena/` and `artwork/arena-prompt.json`; build validation checks both CSS asset paths and the background dimensions/format.
+- Verification: 45 passing Node tests, three pre-existing TODOs, 20 passing desktop/phone Chromium cases, 125 complete engine simulations and a successful static build. Additional visual captures checked 1440×900 desktop, 768×1024 tablet portrait, 390×844 phone portrait and 844×390 phone landscape. Console checks in the captured matches reported no errors. This remains viewport QA, not physical-device certification.

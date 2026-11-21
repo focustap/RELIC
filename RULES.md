@@ -11,7 +11,11 @@ This document specifies the current RELIC solo subset. It is not a claim of comp
 
 ## Turn sequence
 
-Draw and Standby are automatic, followed by Main 1 → Battle → Main 2 → End. The first player skips the first draw and Battle Phase. Each individual player's turn has a unique turn number. Ending a turn draws one card for the next player and resets that player's summon and attack/position allowances.
+The browser uses explicit Draw → Standby → Main 1 → Battle → Main 2 → End states. Draw, Standby and End advance automatically; a Main Phase with no legal summon, spell, set or position action advances automatically, and Battle advances once no eligible attackers remain. The first player skips the first draw and Battle Phase. The next player draws exactly once during Draw. Each player's summon and attack/position allowances reset when that turn begins.
+
+Optional legal actions keep a phase open. Use the contextual Battle/Finish Battle/Finish Turn button, or End turn, to decline remaining actions. There is no inactivity timer or automatic choice of player cards/attacks. Defensive traps retain their automatic-response behavior. The AI resolves one decision per visible step through the same phases. Inspection dialogs and leaving the duel screen pause the browser scheduler; restarting or finishing a duel cancels stale callbacks. Reduced motion changes the visuals, not the rules.
+
+For deterministic simulations, the engine's default batch mode keeps the earlier immediate turn boundary; `stagedTurns: true` enables the browser's explicit automatic phases. `aiTurn` is a batch convenience around the same `aiStep` decision logic used by the interface.
 
 Main phases permit Normal Summon/Set, setting spells/traps, normal spell activation, Fusion and legal position changes. Attack actions are legal only during the active player's Battle Phase. Temporary ATK bonuses expire at the end of the turn in which they were applied.
 
