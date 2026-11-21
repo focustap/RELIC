@@ -92,14 +92,14 @@ function runApp(){
  const listeners={};
  const dom=new Map(),document={
   documentElement:{dataset:{}},getElementById(id){if(!dom.has(id))dom.set(id,mockElement(id));return dom.get(id);},
-  querySelector(){return mockElement("arena")},querySelectorAll(){return []},
+  querySelector(selector){return selector==='.modal:not(.hidden)'?null:mockElement("arena")},querySelectorAll(){return []},
   createElement(tag){return mockElement(tag)},addEventListener(type,callback){listeners[type]=callback}};
  const cache={};
  const localStorage={getItem(k){return cache[k]||null},setItem(k,v){cache[k]=v}};
- const code=read("app.js").replace(/wire\(\);\s*\}\)\(\);\s*$/,'wire();return {begin,phaseNext,turnEnd,aiTurn,openPack,chooseStarter,valid,save:()=>save,game:()=>game,cast,attack,fusion};})();');
+ const code=read("app.js").replace(/wire\(\);\s*\}\)\(\);\s*$/,'wire();return {begin,phaseNext,advanceFlow,turnEnd,aiTurn,openPack,chooseStarter,valid,save:()=>save,game:()=>game,cast,attack,fusion};})();');
  assert.ok(code.includes("return {begin,phaseNext"));
  const script="(function(){"+source+"\nreturn (function(){return "+code.replace(/^\/\*[\s\S]*?\*\/\s*/,"")+";})();})();";
- const context={document,window:{scrollTo(){}},location:{hash:""},localStorage,confirm:()=>true,setTimeout:()=>0,console,Math,Date};
+ const context={document,window:{scrollTo(){}},location:{hash:""},localStorage,confirm:()=>true,setTimeout:()=>0,clearTimeout(){},console,Math,Date};
  const app=vm.runInNewContext(script,context);
  app.__click=event=>listeners.click(event);
  app.__location=context.location;
@@ -127,9 +127,9 @@ test("DOM integration: starting deck selector and solo opening state",()=>{
  assert.equal(app.game().ai.hand.length,5);
 });
 test("DOM integration: first turn skips battle and AI draws",()=>{
- const app=runApp();app.begin();app.phaseNext();
+ const app=runApp();app.begin();app.advanceFlow();app.advanceFlow();app.phaseNext();
  assert.equal(app.game().phase,"main2");
- app.turnEnd();assert.equal(app.game().ai.hand.length,6);
+ app.turnEnd();assert.equal(app.game().phase,'end');app.advanceFlow();app.advanceFlow();app.advanceFlow();assert.equal(app.game().ai.hand.length,6);
  app.aiTurn();assert.equal(app.game().turn,"you");
  assert.equal(app.game().round,2);
 });
@@ -149,7 +149,7 @@ test("DOM integration: direct damage and monster battle update Life Points",()=>
  assert.equal(duel.ai.monsters[0],null);
 });
 test("DOM integration: named-material Fusion consumes components and places fusion",()=>{
- const app=runApp();app.begin();const duel=app.game();
+ const app=runApp();app.begin();app.advanceFlow();app.advanceFlow();const duel=app.game();
  duel.you.hand=["relic-fusion","ember-squire","stonebound-golem"];
  duel.you.extra=["emberstone-colossus"];
  app.fusion("you","hand",0,"emberstone-colossus");

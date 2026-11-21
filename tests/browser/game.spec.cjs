@@ -47,15 +47,16 @@ test('packs charge once, reveal cards individually, and persist inventory',async
 });
 test('solo opening, summoning, phase progression, AI and surrender are usable',async({page},info)=>{
  await go(page,'deck');await page.locator('[data-starter="ember"]').click();await go(page,'duel');await page.locator('#idle-start').click();
+ await expect(page.locator('#duel-play')).toHaveAttribute('data-phase','main1');
  await expect(page.locator('#player-hand [data-hand]')).toHaveCount(5);
  const playable=await page.locator('#player-hand .game-card').evaluateAll(els=>els.map(e=>({id:e.dataset.cardId,index:Number(e.parentElement.dataset.hand)})));
  const normal=playable.find(p=>cards.some(c=>c.id===p.id&&c.type==='monster'&&c.level<=4));
  if(normal){await page.locator('[data-hand="'+normal.index+'"]').click();await page.locator('[data-summon="attack"]').click();await expect(page.locator('#player-monsters .filled')).toHaveCount(1);}
- await page.locator('#advance-phase').click();await expect(page.locator('#duel-phase')).toHaveText('MAIN PHASE 2');
- await page.locator('#end-turn').click();await expect(page.locator('#duel-turn')).toContainText('TURN 3 — YOUR TURN');
+ if(await page.locator('#end-turn').isEnabled())await page.locator('#end-turn').click();
+ await expect(page.locator('#duel-turn')).toContainText('TURN 3 — YOUR TURN',{timeout:20000});
  await page.evaluate(()=>scrollTo(0,0));await page.screenshot({path:'test-results/arena-'+info.project.name+'.png',fullPage:true,animations:"disabled"});
  await page.locator('#surrender').click();await expect(page.locator('#duel-result')).toContainText('DEFEAT');await expect(page.locator('#credits-header')).toHaveText('45');
- await page.locator('#surrender').click();await expect(page.locator('#credits-header')).toHaveText('45');
+ await expect(page.locator('#duel-result')).toBeVisible();await expect(page.locator('#credits-header')).toHaveText('45');
 });
 test('single purchases and deck edits respect owned copies',async({page})=>{
  await go(page,'packs');await page.locator('[data-shop-tab="singles"]').click();

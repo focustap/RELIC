@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="./styles.css">
   <link rel="stylesheet" href="./effects.css">
   <link rel="stylesheet" href="./presentation.css">
+  <link rel="stylesheet" href="./arena.css">
 </head>
 <body>
   <div class="app-shell">
@@ -70,19 +71,35 @@
         <section id="page-duel" class="page">
           <div class="page-head duel-head"><div><div class="eyebrow">THE DUELING GROUNDS</div><h1>Duel <em>Arena</em></h1><p>Challenge the Sanctum Warden. A turn-based solo duel with a classic field.</p></div><div class="duel-header-actions"><button id="new-duel" class="btn btn-gold">⚔ &nbsp; NEW DUEL</button></div></div>
           <div id="duel-idle" class="duel-idle"><div class="idle-mark">⚔</div><h2>Ready to test your deck?</h2><p>Bring 40–60 cards and challenge the Warden. Complete a duel to earn 10 Gold.</p><p id="arena-deck"></p><button data-go="deck" class="btn btn-outline btn-small">CHOOSE A STARTER / EDIT DECK</button><button id="idle-start" class="btn btn-gold">BEGIN DUEL</button></div>
-          <div id="duel-play" class="hidden">
-            <div class="duel-status"><span id="duel-turn">TURN 1 — YOUR TURN</span><span id="duel-phase">MAIN PHASE 1</span><span id="duel-round" class="edition-tag">FIRST EDITION</span></div>
-            <div id="duel-result" class="result-banner hidden" role="status"></div><div class="arena"><div class="arena-player enemy"><div class="player-badge"><span class="avatar">♜</span><div><b>Sanctum Warden</b><span>OPPONENT</span></div></div><div class="lp"><strong id="enemy-lp">8000</strong><span>HP</span></div></div><div id="enemy-hand" class="enemy-hand"></div>
-              <div class="field-row"><div class="field-side"><div class="field-box"><small>DECK</small><div id="enemy-field"></div></div><div class="field-box"><small>GY</small><div id="enemy-grave">0</div></div></div><div class="zones" id="enemy-spells"></div></div>
-              <div class="zones monster-zones" id="enemy-monsters"></div>
-              <div class="field-divider"><i></i><span>✧ &nbsp; RELIC DUEL &nbsp; ✧</span><i></i></div>
-              <div class="zones monster-zones" id="player-monsters"></div>
-              <div class="field-row"><div class="field-side"><div class="field-box"><small>DECK</small><div id="player-field"></div></div><div class="field-box"><small>GY</small><div id="player-grave">0</div></div></div><div class="zones" id="player-spells"></div></div>
-              <div class="arena-player"><div class="player-badge"><span class="avatar avatar-you">✧</span><div><b>Challenger</b><span>YOU</span></div></div><div class="lp"><strong id="player-lp">8000</strong><span>HP</span></div></div>
+          <div id="duel-play" class="hidden" aria-label="RELIC duel arena">
+            <div class="arena">
+              <div class="arena-vignette" aria-hidden="true"></div>
+              <header class="arena-toolbar">
+                <button class="arena-icon" data-go="home" aria-label="Leave arena">‹</button><span class="arena-wordmark">RELIC <small>THE OVERGROWN SANCTUM</small></span>
+                <div class="arena-tools"><button class="arena-icon" id="toggle-duel-log" aria-label="Toggle duel history" aria-expanded="false">≡</button><button class="arena-icon" data-go="settings" aria-label="Game settings">⚙</button><button class="arena-text-button" id="surrender">Surrender</button></div>
+              </header>
+              <div class="duel-status"><span id="duel-turn">TURN 1 — YOUR TURN</span><span id="duel-round" class="edition-tag">SOLO DUEL</span></div>
+              <ol class="phase-track" aria-label="Turn phases"><li data-phase="draw">Draw</li><li data-phase="standby">Standby</li><li data-phase="main1">Main 1</li><li data-phase="battle">Battle</li><li data-phase="main2">Main 2</li><li data-phase="end">End</li></ol>
+              <div class="arena-player enemy"><div class="portrait"><img src="./public/assets/cards/relic-sentinel.webp" alt=""></div><div class="duelist-info"><b>Sanctum Warden</b><span>OPPONENT</span><div class="hp-meter"><i id="enemy-hp-bar"></i></div></div><div class="lp"><span>HP</span><strong id="enemy-lp">8000</strong></div></div>
+              <div id="enemy-hand" class="enemy-hand" aria-label="Opponent hand"></div>
+              <div class="board-layer">
+                <div class="zones enemy-half" id="enemy-spells" aria-label="Opponent spell and trap zones"></div>
+                <div class="zones monster-zones enemy-half" id="enemy-monsters" aria-label="Opponent monster zones"></div>
+                <div class="field-divider"><i></i><span>✧</span><i></i></div>
+                <div class="zones monster-zones player-half" id="player-monsters" aria-label="Your monster zones"></div>
+                <div class="zones player-half" id="player-spells" aria-label="Your spell and trap zones"></div>
+              </div>
+              <div class="arena-piles enemy-piles"><div class="field-box deck-pile"><small>DECK</small><div id="enemy-field">35</div></div><button class="field-box grave-pile" data-pile="ai-grave" aria-label="Inspect opponent graveyard"><small>GRAVE</small><div id="enemy-grave">0</div></button><div class="field-box extra-pile"><small>EXTRA</small><div id="enemy-extra-count">0</div></div></div>
+              <div class="arena-piles player-piles"><button class="field-box extra-pile" data-pile="you-extra" aria-label="Inspect your extra deck"><small>EXTRA</small><div id="player-extra-count">0</div></button><button class="field-box grave-pile" data-pile="you-grave" aria-label="Inspect your graveyard"><small>GRAVE</small><div id="player-grave">0</div></button><div class="field-box deck-pile"><small>DECK</small><div id="player-field">35</div></div></div>
+              <aside class="phase-console"><div class="phase-orb"><small id="phase-owner">YOUR TURN</small><strong id="duel-phase">DRAW</strong><span id="phase-turn-number">TURN 1</span></div><button id="advance-phase" class="arena-phase-action">BATTLE →</button><button id="end-turn" class="arena-end-action">End turn</button></aside>
+              <div id="phase-announcement" class="phase-announcement" role="status" aria-live="polite"></div>
+              <div class="duel-controls"><div class="phase-note" id="duel-hint">Select a card in your hand.</div></div>
+              <div class="selection-panel" id="selected-panel"><div class="empty-select">Select a card.</div></div>
+              <div class="hand-dock"><div class="hand-title">YOUR HAND <b id="hand-count"></b></div><div id="player-hand" class="hand"></div></div>
+              <div class="arena-player player-hud"><div class="portrait"><img src="./public/assets/cards/ember-squire.webp" alt=""></div><div class="duelist-info"><b>Challenger</b><span id="arena-player-deck">YOUR DECK</span><div class="hp-meter"><i id="player-hp-bar"></i></div></div><div class="lp"><span>HP</span><strong id="player-lp">8000</strong></div></div>
+              <aside class="log-panel hidden" id="duel-history"><h4>DUEL HISTORY</h4><div id="duel-log" aria-live="off"></div></aside>
+              <div id="duel-result" class="result-banner hidden" role="status"></div>
             </div>
-            <div class="duel-controls"><div class="phase-note" id="duel-hint">Select a card in your hand.</div><div class="phase-buttons"><button class="btn btn-outline btn-small" id="advance-phase">NEXT PHASE →</button><button class="btn btn-outline btn-small" id="end-turn">END TURN »</button><button class="btn btn-outline btn-small" id="surrender">SURRENDER</button></div></div>
-            <div class="hand-title">YOUR HAND <b id="hand-count"></b></div><div id="player-hand" class="hand"></div>
-            <div class="under-arena"><div class="selection-panel" id="selected-panel"><div class="empty-select">Select a card to view its actions.</div></div><div class="log-panel"><h4>DUEL LOG</h4><div id="duel-log" aria-live="polite"></div></div></div>
           </div>
         </section>
         <section id="page-rules" class="page">
